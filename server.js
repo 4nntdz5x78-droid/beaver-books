@@ -18,7 +18,7 @@ app.use('/books',    require('./books'));
 app.use('/orders',   require('./orders'));
 app.use('/payments', require('./payments'));
 
-app.get('/contato-beaver-books/contato-beaver-books.html', (req, res) => 
+app.get('/contato-beaver-books', (req, res) => 
   res.sendFile(path.join(FRONTEND, 'contato-beaver-books.html')));
 
 app.get('/catalogo-livro-beaver-books/catalogo.html', (req, res) => 
