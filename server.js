@@ -14,7 +14,7 @@ app.use(express.static(FRONTEND));
 app.use(express.static(__dirname));
 
 app.use('/leads',    require('./routes/leads'));
-app.use('/admin',    require('./routes/admins'));
+app.use('/admin',    require('./routes/admin'));
 app.use('/books',    require('./books'));
 app.use('/orders',   require('./orders'));
 app.use('/payments', require('./payments'));
