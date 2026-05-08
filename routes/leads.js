@@ -40,7 +40,10 @@ router.post('/', async (req, res) => {
       mensagem || null, arquivo || null
     ]);
 
-    // 2 ── Envia e-mail de notificação para a equipe (não-fatal)
+    // 2 ── Responde imediatamente após salvar no banco
+    res.json({ ok: true, mensagem: 'Lead salvo com sucesso!' });
+
+    // 3 ── Envia e-mail em segundo plano (não bloqueia a resposta)
     const objetivoLabel = {
       publicar:  '📖 Publicar meu livro',
       orcamento: '💰 Orçamento editorial',
@@ -50,7 +53,7 @@ router.post('/', async (req, res) => {
       suporte:   '🛠 Suporte'
     }[objetivo] || objetivo;
 
-    try { await transporter.sendMail({
+    transporter.sendMail({
       from: `"Beaver Books Site" <${process.env.EMAIL_USER}>`,
       to:   process.env.EMAIL_DESTINO,
       subject: `📚 Novo lead: ${nome} — ${objetivoLabel}`,
@@ -137,11 +140,7 @@ router.post('/', async (req, res) => {
           </div>
         </div>
       `
-    }); } catch (emailErr) {
-      console.error('Aviso: e-mail não enviado:', emailErr.message);
-    }
-
-    res.json({ ok: true, mensagem: 'Lead salvo com sucesso!' });
+    }).catch(emailErr => console.error('Aviso: e-mail não enviado:', emailErr.message));
 
   } catch (err) {
     console.error('Erro ao salvar lead:', err.message);
