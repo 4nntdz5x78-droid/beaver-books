@@ -62,8 +62,9 @@ const btn = document.querySelector('.btn-cta');
 
     if (res.ok) {
       document.getElementById('contact-form').style.display = 'none';
-      document.getElementById('success-msg').classList.add('show');
-      window.scrollTo({top:document.getElementById('form').offsetTop-80,behavior:'smooth'});
+      const msg = document.getElementById('success-msg');
+      msg.classList.add('show');
+      msg.scrollIntoView({behavior:'smooth', block:'center'});
     } else {
       throw new Error('Erro no servidor');
     }
