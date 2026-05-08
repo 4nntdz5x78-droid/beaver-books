@@ -1,51 +1,73 @@
-  :root {
-    --red: #c0143c;
-    --red-dark: #8e0e2b;
-    --red-light: #e8183a;
-    --dark: #171717;
-    --body-bg: #f5f2ee;
-    --text: #1a1a1a;
-    --text-muted: #6b6b6b;
-    --border: #e0dbd4;
-    --white: #ffffff;
-    --card-bg: #ffffff;
-    --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c0143c;
+  --red-dark:#9a0f2e;
+  --red-light:#e8183f;
+  --dark:#171717;
+  --dark2:#222222;
+  --body-bg:#f5f2ee;
+  --cream:#faf8f5;
+  --border:#e0dbd4;
+  --muted:#7a7268;
+  --ink:#1c1a17;
+  --white:#ffffff;
+  --ff-title:'Playfair Display',serif;
+  --ff-body:'Cormorant Garamond',serif;
+  --ff-ui:'Inter',sans-serif;
+  --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
 
-  }
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
 
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  /* ── Announcement Bar ─────────────────────────────────────────── */
+.announce-bar {
+  background: var(--red);
+  overflow: hidden;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 1001;
+}
 
-  html { scroll-behavior: smooth; }
+.announce-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  white-space: nowrap;
+  animation: marquee 28s linear infinite;
+  will-change: transform;
+}
 
-  body {
-    font-family: 'Cormorant Garamond', 'Georgia', serif;
-    background: var(--body-bg);
-    color: var(--text);
-    overflow-x: hidden;
-  }
+.announce-bar:hover .announce-track {
+  animation-play-state: paused;
+}
 
+.announce-item {
+  font-size: .8rem;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: .02em;
+  padding: 0 32px;
+}
 
-  /* ──────────────── TYPOGRAPHY ──────────────── */
-  h1, h2, h3 {
-    font-family: 'Playfair Display', Georgia, serif;
-  }
-  .section-label, .book-genre, .post-tag, .autor-books, .post-date, nav a, .btn, .stat span, .footer-col h4, .footer-bottom {
-    font-family: 'Inter', sans-serif;
-  }
-  .section-desc, .sobre-content p, .step p, .servico-card p, .post-body p, .depo-card blockquote, .hero-text p, .hero-badge p, .value-item span, .autor-card span, .footer-brand p {
-    font-family: 'Cormorant Garamond', Georgia, serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 1.05rem;
-    line-height: 1.85;
-  }
-  .section-title em, .sobre-content h2 em, .hero-text h1 em {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-style: italic;
-  }
-  .stat strong {
-    font-family: 'Playfair Display', Georgia, serif;
-  }
+.announce-item strong {
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+
+.announce-sep {
+  color: rgba(255,255,255,.4);
+  font-size: .6rem;
+  flex-shrink: 0;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 
   /* ──────────────── HEADER ──────────────── */
   header {
@@ -108,11 +130,20 @@
     color: #ffffff;
     padding: 0.45rem 1rem;
     margin-left: 0.4rem;
+    transition: background .2s, box-shadow .3s, transform .2s;
   }
 
   nav a.cta:hover {
-    background: #a01030;
+    background: var(--red-light);
+    transform: translateY(-1px);
   }
+
+  
+
+.cta:hover{background:var(--red-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(192,20,60,.3)}
+.cta:active{transform:none}
+.cta::after{content:'→';margin-left:.5rem;transition:.2s}
+.cta:hover::after{margin-left:.85rem}
 
   .hamburger {
     display: none;
@@ -1614,7 +1645,7 @@
 
   /* ──────────────── DEPOIMENTOS ──────────────── */
   #depoimentos {
-    background: var(--body-bg);
+    background: #eee9e3;
   }
 
   .depoimentos-grid {
@@ -1921,7 +1952,6 @@
   .social-link {
     width: 34px;
     height: 34px;
-    background: rgba(255,255,255,0.06);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -1930,11 +1960,6 @@
     text-decoration: none;
     color: rgba(255,255,255,0.6);
     transition: background 0.2s, color 0.2s;
-  }
-
-  .social-link:hover {
-    background: var(--red);
-    color: white;
   }
 
   .footer-col h4 {
