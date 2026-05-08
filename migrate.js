@@ -33,6 +33,23 @@ async function migrate() {
         quantidade       INTEGER NOT NULL,
         preco_unitario   NUMERIC(10,2) NOT NULL
       );
+
+      CREATE TABLE IF NOT EXISTS leads (
+        id         SERIAL PRIMARY KEY,
+        nome       TEXT NOT NULL,
+        email      TEXT NOT NULL,
+        whatsapp   TEXT,
+        cidade     TEXT,
+        objetivo   TEXT,
+        genero     TEXT,
+        finalizado TEXT,
+        paginas    INTEGER,
+        obj_livro  TEXT,
+        prazo      TEXT,
+        mensagem   TEXT,
+        arquivo    TEXT,
+        criado_em  TIMESTAMP DEFAULT NOW()
+      );
     `);
     console.log('✅ Tabelas criadas com sucesso!');
   } catch (err) {
