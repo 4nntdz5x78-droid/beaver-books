@@ -1,5 +1,5 @@
 
-  const API = 'http://localhost:3000';
+  const API = '';
   let currentBook = null;
   let qty = 1;
   let cart = loadCart();

@@ -54,7 +54,7 @@ const btn = document.querySelector('.btn-cta');
   };
 
   try {
-    const res = await fetch('http://localhost:3000/leads', {
+    const res = await fetch('/leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(dados)

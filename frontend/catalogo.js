@@ -156,7 +156,7 @@ async function fetchBooks() {
   renderSkeletons(12);
 
   try {
-    const res  = await fetch(`http://localhost:3000/books?${params}`);
+    const res  = await fetch(`/books?${params}`);
     const data = await res.json();
 
     state.paginas = data.paginas || 1;
@@ -187,7 +187,7 @@ async function fetchBooks() {
 
 async function fetchGeneros() {
   try {
-    const res    = await fetch('http://localhost:3000/books/generos');
+    const res    = await fetch('/books/generos');
     const genres = await res.json();
     if (generoSelect) {
       generoSelect.innerHTML = '<option value="">Todos os gêneros</option>' +
@@ -365,7 +365,7 @@ async function submitOrder(nome, email) {
 
   try {
     // 1. Criar pedido
-    const res  = await fetch('http://localhost:3000/orders', {
+    const res  = await fetch('/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cliente_nome: nome, cliente_email: email, itens }),
@@ -374,7 +374,7 @@ async function submitOrder(nome, email) {
     if (!res.ok || !data.ok) throw new Error(data.erro || 'Erro ao processar pedido.');
 
     // 2. Gerar PIX
-    const pixRes = await fetch('http://localhost:3000/payments/pix', {
+    const pixRes = await fetch('/payments/pix', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_id: data.pedido_id, cliente_nome: nome, cliente_email: email }),
@@ -455,7 +455,7 @@ function showPixQRCode(pedidoId, pixData) {
 
   const polling = setInterval(async () => {
     try {
-      const r = await fetch('http://localhost:3000/payments/status/' + pedidoId);
+      const r = await fetch('/payments/status/' + pedidoId);
       const d = await r.json();
       if (d.paid) {
         clearInterval(polling);
