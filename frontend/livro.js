@@ -19,7 +19,13 @@
   function cartTotal(){ return cart.reduce((s,i)=>s+i.preco*i.quantidade,0); }
   function fmtPrice(v){ return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v); }
   function escHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function getBookId(){ return new URLSearchParams(window.location.search).get('id'); }
+  function getBookId(){
+    // suporta /livro.html?id=1  e  /livro/1
+    const fromQuery = new URLSearchParams(window.location.search).get('id');
+    if (fromQuery) return fromQuery;
+    const match = window.location.pathname.match(/\/livro\/(\d+)/);
+    return match ? match[1] : null;
+  }
 
   function toast(msg, type='success'){
     const c = document.getElementById('toast-container');
