@@ -3,7 +3,7 @@
   --red:#c0143c;
   --red-dark:#9a0f2e;
   --red-light:#e8183f;
-  --dark:#171717;
+  --dark:#171717; 
   --dark2:#222222;
   --body-bg:#f5f2ee;
   --cream:#faf8f5;
@@ -148,7 +148,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
 
   .hamburger {
     display: none;
-    flex-direction: column;
+    flex-direction: colu smn;
     gap: 5px;
     cursor: pointer;
     padding: 4px;
