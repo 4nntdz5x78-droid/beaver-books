@@ -16,6 +16,7 @@
   --ff-ui:'Inter',sans-serif;
   --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
   --gold:        #f5c842;
+  --radius:      20px;
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
