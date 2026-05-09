@@ -15,7 +15,7 @@
   --ff-body:'Cormorant Garamond',serif;
   --ff-ui:'Inter',sans-serif;
   --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
-
+  --gold:        #f5c842;
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
@@ -747,7 +747,7 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   border-radius: 4px;
   padding: 2px 8px;
   font-size: 11px;
-  color: #fff;
+  color: var(--gold);
   backdrop-filter: blur(4px);
   letter-spacing: .04em;
   text-transform: uppercase;
