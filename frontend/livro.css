@@ -233,7 +233,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   gap: 4px;
   transition: color .2s, border-color .2s, background .2s;
 }
-.cover-action-btn:hover { color: var(--ink); border-color: var(--border-dark); background: var(--cream); }
+.cover-action-btn:hover { color: var(--red); border-color: var(--red); background: var(--cream); transform: translateY(-1px); }
 
 /* Garantias */
 .guarantees {
@@ -405,7 +405,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   transition: background .2s, color .2s;
   flex-shrink: 0;
 }
-.coupon-btn:hover { background: var(--border); color: var(--ink); }
+.coupon-btn:hover { background: var(--ink); color: #fff; }
 .coupon-msg { font-size: 12px; margin-top: 5px; padding-left: 4px; }
 .coupon-msg.success { color: #15803d; }
 .coupon-msg.error   { color: var(--red); }
@@ -440,7 +440,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   transition: background .2s;
   flex-shrink: 0;
 }
-.shipping-calc-btn:hover { background: #333; }
+.shipping-calc-btn:hover { background: var(--red); box-shadow: var(--glow); transform: translateY(-1px); }
 .shipping-result { margin-top: 8px; font-size: 13px; }
 .shipping-option {
   display: flex;
@@ -535,7 +535,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   align-items: center;
   transition: color .2s, border-color .2s;
 }
-.btn-wishlist:hover { color: var(--red); border-color: var(--red); }
+.btn-wishlist:hover { color: var(--red); border-color: var(--red); transform: translateY(-1px); }
 
 .btn-buy-now {
   width: 100%;
