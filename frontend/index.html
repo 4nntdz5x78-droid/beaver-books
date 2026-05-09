@@ -470,63 +470,8 @@
       </div>
       <a href="catalogo.html" class="btn btn-primary" style="background:transparent;color:var(--red);border:1.5px solid var(--red)">Ver catálogo completo</a>
     </div>
-    <div class="livros-grid">
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#1a0a10;--bg2:#3a0d1f">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">O Silêncio das Marés</p>
-            <p class="book-cover-author">ANA COSTA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Romance</p>
-          <p class="book-title">O Silêncio das Marés</p>
-          <p class="book-author">Ana Costa</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#0a1a15;--bg2:#0d3a28">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">Territórios do Esquecimento</p>
-            <p class="book-cover-author">MARCOS FEITOSA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Ficção Literária</p>
-          <p class="book-title">Territórios do Esquecimento</p>
-          <p class="book-author">Marcos Feitosa</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#0d0d2e;--bg2:#1a1a5e">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">A Física das Despedidas</p>
-            <p class="book-cover-author">LUCIA MAIA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Não-Ficção</p>
-          <p class="book-title">A Física das Despedidas</p>
-          <p class="book-author">Lucia Maia</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#1a110a;--bg2:#3a1f0d">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">Raízes do Amanhã</p>
-            <p class="book-cover-author">PEDRO LEMOS</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Ensaio</p>
-          <p class="book-title">Raízes do Amanhã</p>
-          <p class="book-author">Pedro Lemos</p>
-        </div>
-      </div>
+    <div class="livros-grid" id="livros-grid">
+      <!-- preenchido dinamicamente via JS -->
     </div>
   </div>
 </section>
@@ -825,6 +770,68 @@
     </div>
   </div>
 </footer>
+
+<script>
+/* ── Livros dinâmicos ────────────────────────────────────────────────────── */
+(function () {
+  const COVER_GRADIENTS = [
+    ['#1a0a10','#3a0d1f'],
+    ['#0a1a15','#0d3a28'],
+    ['#0d0d2e','#1a1a5e'],
+    ['#1a110a','#3a1f0d'],
+    ['#1a1a0a','#3a380d'],
+    ['#0d1a2e','#0d2e5e'],
+  ];
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderLivros(livros) {
+    const grid = document.getElementById('livros-grid');
+    if (!grid) return;
+    if (!livros || livros.length === 0) {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Nenhum livro disponível no momento.</p>';
+      return;
+    }
+    grid.innerHTML = livros.map((l, i) => {
+      const [bg, bg2] = COVER_GRADIENTS[i % COVER_GRADIENTS.length];
+      const coverHtml = l.capa
+        ? `<img src="${escHtml(l.capa)}" alt="${escHtml(l.titulo)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px 8px 0 0;">`
+        : `<div class="book-cover-inner" style="--bg:${bg};--bg2:${bg2}">
+             <div class="book-cover-deco"></div>
+             <p class="book-cover-title">${escHtml(l.titulo)}</p>
+             <p class="book-cover-author">${escHtml(l.autor.toUpperCase())}</p>
+           </div>`;
+      return `
+        <div class="book-card" onclick="location='/livro/${l.id}'" style="cursor:pointer" role="link" tabindex="0">
+          <div class="book-cover">${coverHtml}</div>
+          <div class="book-info">
+            ${l.genero ? `<p class="book-genre">${escHtml(l.genero)}</p>` : ''}
+            <p class="book-title">${escHtml(l.titulo)}</p>
+            <p class="book-author">${escHtml(l.autor)}</p>
+          </div>
+        </div>`;
+    }).join('');
+
+    // aplica fade-in nos novos cards
+    grid.querySelectorAll('.book-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  }
+
+  fetch('/books?limite=4&order_by=recentes')
+    .then(r => r.json())
+    .then(d => renderLivros(d.livros || []))
+    .catch(() => {
+      const grid = document.getElementById('livros-grid');
+      if (grid) grid.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Não foi possível carregar os livros.</p>';
+    });
+})();
+</script>
 
 <script>
   function toggleNav() {
