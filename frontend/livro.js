@@ -514,11 +514,11 @@
   function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow=''; }
 
   /* ── Events ─────────────────────────────────────────── */
-  document.getElementById('cart-btn').addEventListener('click', openCart);
-  document.getElementById('cart-close-btn').addEventListener('click', closeCart);
-  document.getElementById('cart-overlay').addEventListener('click', closeCart);
-  document.getElementById('checkout-btn').addEventListener('click', openCheckout);
-  document.getElementById('modal-overlay').addEventListener('click', e=>{ if(e.target===document.getElementById('modal-overlay')) closeModal(); });
+  document.getElementById('cart-btn')?.addEventListener('click', openCart);
+  document.getElementById('cart-close-btn')?.addEventListener('click', closeCart);
+  document.getElementById('cart-overlay')?.addEventListener('click', closeCart);
+  document.getElementById('checkout-btn')?.addEventListener('click', openCheckout);
+  document.getElementById('modal-overlay')?.addEventListener('click', e=>{ if(e.target===document.getElementById('modal-overlay')) closeModal(); });
   document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeCart(); closeModal(); }});
   window.addEventListener('storage', e=>{ if(e.key==='beaver_cart'){ cart=loadCart(); updateCartUI(); }});
   // CEP mask
