@@ -1,36 +1,26 @@
-/* ── Reset & Tokens ───────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg:          #f0ebe3;
-  --bg-surface:  #e8e2d9;
-  --bg-card:     #ffffff;
-  --border:      #d4cdc4;
-  --border-light:#b8b0a6;
-  --red:         #c0143c;
-  --red-hover:   #a01030;
-  --text:        #1c1a17;
-  --text-muted:  #6b5e57;
-  --text-dim:    #9e9386;
-  --gold:        #b89a5a;
-  --font-serif:  'Playfair Display', 'Cormorant Garamond', Georgia, serif;
-  --font-body:   'Inter', system-ui, sans-serif;
-  --dark:        #f0ebe3;
-  --white:       #1c1a17;
-  --red-light:   #c0143c;
-  --radius:      6px;
-  --shadow:      0 4px 20px rgba(0,0,0,.12);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c0143c;
+  --red-dark:#9a0f2e;
+  --red-light:#e8183f;
+  --dark:#171717;
+  --dark2:#222222;
+  --body-bg:#f5f2ee;
+  --cream:#faf8f5;
+  --border:#e0dbd4;
+  --muted:#7a7268;
+  --ink:#1c1a17;
+  --white:#ffffff;
+  --ff-title:'Playfair Display',serif;
+  --ff-body:'Cormorant Garamond',serif;
+  --ff-ui:'Inter',sans-serif;
   --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
+
 }
+html{scroll-behavior:smooth}
+body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
 
-
-    html, body { margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.6; min-height: 100vh; }
-    a { color: inherit; text-decoration: none; }
-    img { display: block; max-width: 100%; }
-    button { cursor: pointer; font-family: inherit; }
-
-/* ── Announcement Bar ─────────────────────────────────────────── */
+  /* ── Announcement Bar ─────────────────────────────────────────── */
 .announce-bar {
   background: var(--red);
   overflow: hidden;
@@ -78,14 +68,15 @@
   to   { transform: translateX(-50%); }
 }
 
+
   /* ──────────────── HEADER ──────────────── */
   header {
-    background: #f0ebe3;
+    background: #111010;
     position: sticky;
     top: 0;
     z-index: 1000;
     margin-top: 0;
-    border-bottom: 1px solid rgba(192,20,60,0.25);
+    border-bottom: 1px solid rgba(192,20,60,0.3);
   }
 
   .header-inner {
@@ -117,7 +108,7 @@
   }
 
   nav a {
-    color: #3d3530;
+    color: rgba(255,255,255,0.82);
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
@@ -130,8 +121,8 @@
   }
 
   nav a:hover {
-    color: #c0143c;
-    background: rgba(192,20,60,0.08);
+    color: #ffffff;
+    background: rgba(192,20,60,0.18);
   }
 
   nav a.cta {
@@ -143,10 +134,16 @@
   }
 
   nav a.cta:hover {
-    background: #a01030;
-    box-shadow: var(--glow);
+    background: var(--red-light);
     transform: translateY(-1px);
   }
+
+  
+
+.cta:hover{background:var(--red-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(192,20,60,.3)}
+.cta:active{transform:none}
+.cta::after{content:'→';margin-left:.5rem;transition:.2s}
+.cta:hover::after{margin-left:.85rem}
 
   .hamburger {
     display: none;

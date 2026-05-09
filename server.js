@@ -49,8 +49,15 @@ async function runMigrations() {
         prazo      TEXT,
         mensagem   TEXT,
         arquivo    TEXT,
+        status     TEXT NOT NULL DEFAULT 'novo',
+        anotacao   TEXT,
         criado_em  TIMESTAMP DEFAULT NOW()
       );
+    `);
+    // Adiciona colunas novas em tabelas existentes (idempotente)
+    await client.query(`
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS status   TEXT NOT NULL DEFAULT 'novo';
+      ALTER TABLE leads ADD COLUMN IF NOT EXISTS anotacao TEXT;
     `);
     console.log('✅ Migrations executadas com sucesso!');
   } catch (err) {

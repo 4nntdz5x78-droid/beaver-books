@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Painel Admin — Beaver Books</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --red:    #c0143c;
+    --red-d:  #9e1032;
+    --dark:   #171717;
+    --bg:     #f5f2ee;
+    --white:  #ffffff;
+    --border: #e0dbd4;
+    --text:   #1c1a17;
+    --muted:  #7a6f63;
+    --green:  #22c55e;
+    --amber:  #f59e0b;
+    --blue:   #3b82f6;
+    --sidebar-w: 220px;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+  /* ── Login ── */
+  #login-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; background: var(--dark);
+  }
+  .login-card {
+    background: #222; border: 1px solid #333; border-radius: 12px;
+    padding: 40px; width: 100%; max-width: 360px; text-align: center;
+  }
+  .login-card h1 { color: var(--red); font-size: 1.6rem; margin-bottom: 6px; }
+  .login-card p  { color: #aaa; font-size: 0.85rem; margin-bottom: 28px; }
+  .login-card input {
+    width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid #444;
+    background: #2a2a2a; color: #fff; font-size: 0.95rem; margin-bottom: 14px;
+    outline: none;
+  }
+  .login-card input:focus { border-color: var(--red); }
+  .btn-login {
+    width: 100%; padding: 12px; background: var(--red); color: #fff;
+    border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: background .2s;
+  }
+  .btn-login:hover { background: var(--red-d); }
+  .login-err { color: #f87171; font-size: 0.82rem; margin-top: 10px; }
+
+  /* ── Shell ── */
+  #app { display: none; height: 100vh; overflow: hidden; }
+  .shell { display: flex; height: 100vh; }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--dark); color: #ccc;
+    display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 20px 20px 16px; border-bottom: 1px solid #333;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sidebar-logo span { font-size: 1rem; font-weight: 700; color: var(--red); }
+  .sidebar-logo small { display: block; font-size: 0.68rem; color: #666; }
+  .sidebar-nav { flex: 1; padding: 12px 0; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 20px; font-size: 0.87rem; cursor: pointer;
+    transition: background .15s, color .15s; border-left: 3px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover  { background: #222; color: #fff; }
+  .nav-item.active { background: #1e1e1e; color: #fff; border-left-color: var(--red); }
+  .nav-item svg   { flex-shrink: 0; }
+  .sidebar-footer {
+    padding: 16px 20px; border-top: 1px solid #333; font-size: 0.78rem; color: #555;
+  }
+  .btn-logout {
+    background: none; border: 1px solid #444; color: #aaa; padding: 7px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 0.8rem; width: 100%;
+    transition: background .15s, color .15s;
+  }
+  .btn-logout:hover { background: #333; color: #fff; }
+
+  /* ── Main ── */
+  .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+  .topbar {
+    background: var(--white); border-bottom: 1px solid var(--border);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar h2 { font-size: 1.15rem; font-weight: 700; color: var(--text); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .badge-pill {
+    background: var(--red); color: #fff; font-size: 0.72rem; font-weight: 700;
+    padding: 3px 9px; border-radius: 99px;
+  }
+  .content { padding: 28px; flex: 1; }
+
+  /* ── Tab sections ── */
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
+
+  /* ── Stats ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px; text-align: center;
+  }
+  .stat-card .num { font-size: 2rem; font-weight: 800; color: var(--red); }
+  .stat-card .lbl { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  /* ── Toolbar (search + actions) ── */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 18px;
+  }
+  .toolbar input, .toolbar select {
+    padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.88rem; background: var(--white); color: var(--text);
+    outline: none; min-width: 180px;
+  }
+  .toolbar input:focus, .toolbar select:focus { border-color: var(--red); }
+  .toolbar-spacer { flex: 1; }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 8px; font-size: 0.87rem; font-weight: 600;
+    cursor: pointer; border: none; transition: background .15s, opacity .15s;
+  }
+  .btn-primary   { background: var(--red);   color: #fff; }
+  .btn-primary:hover { background: var(--red-d); }
+  .btn-secondary { background: var(--bg);    color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: #ebe6df; }
+  .btn-danger    { background: #fee2e2;      color: #b91c1c; }
+  .btn-danger:hover { background: #fecaca; }
+  .btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* ── Table ── */
+  .table-wrap { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  thead th {
+    background: var(--bg); padding: 12px 16px; text-align: left;
+    font-weight: 600; color: var(--muted); font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: .04em; border-bottom: 1px solid var(--border);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf8f5; }
+  tbody td { padding: 12px 16px; vertical-align: middle; }
+  .cell-title { font-weight: 600; color: var(--text); }
+  .cell-sub   { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Status badges ── */
+  .status-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 99px;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .status-novo        { background:#dbeafe; color:#1d4ed8; }
+  .status-em_contato  { background:#fef9c3; color:#854d0e; }
+  .status-publicando  { background:#dcfce7; color:#166534; }
+  .status-encerrado   { background:#f3f4f6; color:#6b7280; }
+  .status-pendente    { background:#fef9c3; color:#854d0e; }
+  .status-confirmado  { background:#dcfce7; color:#166534; }
+  .status-enviado     { background:#dbeafe; color:#1d4ed8; }
+  .status-entregue    { background:#f0fdf4; color:#15803d; }
+  .status-cancelado   { background:#fee2e2; color:#b91c1c; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: .3; }
+  .empty-state h3 { font-size: 1rem; margin-bottom: 6px; color: var(--text); }
+  .empty-state p  { font-size: 0.85rem; }
+
+  /* ── Modal ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white); border-radius: 12px; width: 100%; max-width: 520px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h3 { font-size: 1rem; font-weight: 700; }
+  .modal-close {
+    background: none; border: none; cursor: pointer; color: var(--muted);
+    padding: 4px; border-radius: 4px; transition: color .15s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 16px 24px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  /* ── Form ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1/-1; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.9rem; color: var(--text); background: var(--white); outline: none;
+    transition: border-color .15s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--red); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-group .hint { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── Detail panel ── */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .detail-item label { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; display: block; margin-bottom: 3px; }
+  .detail-item span  { font-size: 0.9rem; color: var(--text); }
+  .detail-item.full  { grid-column: 1/-1; }
+  .detail-msg { background: var(--bg); border-radius: 8px; padding: 12px; font-size: 0.88rem; line-height: 1.6; color: var(--text); margin-top: 4px; }
+
+  /* ── Toast ── */
+  #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 12px 18px; border-radius: 8px; font-size: 0.87rem; font-weight: 500;
+    color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.15); animation: slideIn .2s ease;
+  }
+  .toast.success { background: #16a34a; }
+  .toast.error   { background: #dc2626; }
+  .toast.info    { background: #2563eb; }
+  @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+  /* ── Capa thumb ── */
+  .capa-thumb { width: 40px; height: 56px; object-fit: cover; border-radius: 4px; }
+  .capa-placeholder { width:40px; height:56px; background:var(--bg); border-radius:4px; display:flex; align-items:center; justify-content:center; }
+
+  /* ── Responsive ── */
+  @media(max-width:700px){
+    .sidebar { display: none; }
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ──────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-card">
+    <h1>📚 Beaver Books</h1>
+    <p>Painel Administrativo</p>
+    <input type="password" id="senha-input" placeholder="Senha de acesso" autocomplete="current-password"/>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ── APP ────────────────────────────────────────────────── -->
+<div id="app">
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div>
+          <span>Beaver Books</span>
+          <small>Admin Panel</small>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <div class="nav-item" data-tab="leads" onclick="switchTab('leads', this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Leads
+          <span class="badge-pill" id="badge-novos" style="margin-left:auto;display:none"></span>
+        </div>
+        <div class="nav-item" data-tab="livros" onclick="switchTab('livros', this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12"/></svg>
+          Catálogo
+        </div>
+        <div class="nav-item" data-tab="pedidos" onclick="switchTab('pedidos', this)">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+          Pedidos
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="doLogout()">Sair</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="topbar">
+        <h2 id="topbar-title">Dashboard</h2>
+        <div class="topbar-right">
+          <span style="font-size:.8rem;color:var(--muted)" id="topbar-user">Admin</span>
+        </div>
+      </div>
+
+      <div class="content">
+
+        <!-- ── DASHBOARD ── -->
+        <div id="tab-dashboard" class="tab-section active">
+          <div class="stats-grid" id="stats-grid">
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Total de leads</div></div>
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Novos</div></div>
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Em contato</div></div>
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Publicando</div></div>
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Encerrados</div></div>
+            <div class="stat-card"><div class="num">—</div><div class="lbl">Últimos 7 dias</div></div>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div class="stat-card" style="flex:1;min-width:200px;text-align:left">
+              <div style="font-weight:700;margin-bottom:12px">Acesso rápido</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button class="btn btn-primary" onclick="switchTab('livros', document.querySelector('[data-tab=livros]'));document.getElementById('modal-livro').classList.add('open')">+ Adicionar livro</button>
+                <button class="btn btn-secondary" onclick="switchTab('leads', document.querySelector('[data-tab=leads]'))">Ver leads recentes</button>
+                <button class="btn btn-secondary" onclick="switchTab('pedidos', document.querySelector('[data-tab=pedidos]'))">Ver pedidos</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── LEADS ── -->
+        <div id="tab-leads" class="tab-section">
+          <div class="toolbar">
+            <input type="search" id="lead-busca" placeholder="Buscar por nome, e-mail ou WhatsApp…" oninput="loadLeads()"/>
+            <select id="lead-objetivo" onchange="loadLeads()">
+              <option value="">Todos os objetivos</option>
+              <option value="publicar">Publicar livro</option>
+              <option value="orcamento">Orçamento editorial</option>
+              <option value="parceria">Parceria</option>
+              <option value="duvidas">Dúvidas gerais</option>
+              <option value="imprensa">Imprensa</option>
+              <option value="suporte">Suporte</option>
+            </select>
+            <select id="lead-status" onchange="loadLeads()">
+              <option value="">Todos os status</option>
+              <option value="novo">Novo</option>
+              <option value="em_contato">Em contato</option>
+              <option value="publicando">Publicando</option>
+              <option value="encerrado">Encerrado</option>
+            </select>
+            <div class="toolbar-spacer"></div>
+            <button class="btn btn-secondary btn-sm" onclick="loadLeads()">↻ Atualizar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th><th>Objetivo</th><th>WhatsApp</th><th>Status</th><th>Recebido</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="leads-tbody">
+                <tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── LIVROS ── -->
+        <div id="tab-livros" class="tab-section">
+          <div class="toolbar">
+            <input type="search" id="livro-busca" placeholder="Buscar por título ou autor…" oninput="loadLivros()"/>
+            <select id="livro-genero" onchange="loadLivros()">
+              <option value="">Todos os gêneros</option>
+              <option>Romance</option>
+              <option>Ficção científica</option>
+              <option>Fantasia</option>
+              <option>Terror</option>
+              <option>Thriller</option>
+              <option>Autoajuda</option>
+              <option>Biografia</option>
+              <option>Poesia</option>
+              <option>Conto</option>
+              <option>Infantil</option>
+              <option>Negócios</option>
+              <option>Educação</option>
+              <option>Outro</option>
+            </select>
+            <div class="toolbar-spacer"></div>
+            <button class="btn btn-primary" onclick="openModalLivro()">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Novo livro
+            </button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Capa</th><th>Título / Autor</th><th>Gênero</th><th>Preço</th><th>Estoque</th><th></th></tr>
+              </thead>
+              <tbody id="livros-tbody">
+                <tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ── PEDIDOS ── -->
+        <div id="tab-pedidos" class="tab-section">
+          <div class="toolbar">
+            <input type="search" id="pedido-busca" placeholder="Buscar por nome ou e-mail…" oninput="loadPedidos()"/>
+            <select id="pedido-status" onchange="loadPedidos()">
+              <option value="">Todos os status</option>
+              <option value="pendente">Pendente</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="enviado">Enviado</option>
+              <option value="entregue">Entregue</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
+            <div class="toolbar-spacer"></div>
+            <button class="btn btn-secondary btn-sm" onclick="loadPedidos()">↻ Atualizar</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Cliente</th><th>Total</th><th>Status</th><th>Data</th><th></th></tr>
+              </thead>
+              <tbody id="pedidos-tbody">
+                <tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL LIVRO ─────────────────────────────────────────── -->
+<div class="modal-overlay" id="modal-livro">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-livro-title">Novo livro</h3>
+      <button class="modal-close" onclick="closeModalLivro()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form id="form-livro" autocomplete="off">
+        <input type="hidden" id="livro-id"/>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Título *</label>
+            <input type="text" id="livro-titulo" placeholder="Ex: O Nome do Vento" required/>
+          </div>
+          <div class="form-group full">
+            <label>Autor *</label>
+            <input type="text" id="livro-autor" placeholder="Ex: Ana Souza" required/>
+          </div>
+          <div class="form-group">
+            <label>Preço (R$) *</label>
+            <input type="number" id="livro-preco" placeholder="49.90" step="0.01" min="0" required/>
+          </div>
+          <div class="form-group">
+            <label>Estoque *</label>
+            <input type="number" id="livro-estoque" placeholder="10" min="0" required/>
+          </div>
+          <div class="form-group">
+            <label>Gênero</label>
+            <select id="livro-genero-form">
+              <option value="">— Selecione —</option>
+              <option>Romance</option>
+              <option>Ficção científica</option>
+              <option>Fantasia</option>
+              <option>Terror</option>
+              <option>Thriller</option>
+              <option>Autoajuda</option>
+              <option>Biografia</option>
+              <option>Poesia</option>
+              <option>Conto</option>
+              <option>Infantil</option>
+              <option>Negócios</option>
+              <option>Educação</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL da capa</label>
+            <input type="url" id="livro-capa" placeholder="https://…/capa.jpg"/>
+            <span class="hint">Link direto para a imagem da capa</span>
+          </div>
+          <div class="form-group full">
+            <label>Descrição</label>
+            <textarea id="livro-descricao" placeholder="Sinopse do livro…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModalLivro()">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-livro" onclick="salvarLivro()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL LEAD DETALHE ──────────────────────────────────── -->
+<div class="modal-overlay" id="modal-lead">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Detalhe do lead</h3>
+      <button class="modal-close" onclick="closeModalLead()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-lead-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModalLead()">Fechar</button>
+      <button class="btn btn-primary" id="btn-salvar-lead" onclick="salvarLead()">Salvar anotação</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL PEDIDO DETALHE ────────────────────────────────── -->
+<div class="modal-overlay" id="modal-pedido">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-pedido-title">Pedido</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-pedido').classList.remove('open')">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modal-pedido-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('modal-pedido').classList.remove('open')">Fechar</button>
+      <button class="btn btn-primary" id="btn-salvar-pedido" onclick="salvarPedido()">Salvar status</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast-container"></div>
+
+<script>
+/* ── Auth ───────────────────────────────────────────────────────────────────── */
+let SENHA = '';
+let currentLeadId = null;
+let currentPedidoId = null;
+
+function doLogin() {
+  const s = document.getElementById('senha-input').value.trim();
+  if (!s) return;
+  SENHA = s;
+  api('/admin/stats').then(() => {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadDashboard();
+  }).catch(() => {
+    document.getElementById('login-err').textContent = 'Senha incorreta.';
+    SENHA = '';
+  });
+}
+
+document.getElementById('senha-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogout() {
+  SENHA = '';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('senha-input').value = '';
+  document.getElementById('login-err').textContent = '';
+}
+
+/* ── API helper ─────────────────────────────────────────────────────────────── */
+async function api(path, opts = {}) {
+  const res = await fetch(path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', 'x-admin-senha': SENHA, ...(opts.headers || {}) },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.erro || 'Erro na requisição');
+  return data;
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────────────────── */
+const TAB_TITLES = { dashboard: 'Dashboard', leads: 'Leads', livros: 'Catálogo de livros', pedidos: 'Pedidos' };
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('topbar-title').textContent = TAB_TITLES[name] || name;
+  if (name === 'dashboard') loadDashboard();
+  if (name === 'leads')     loadLeads();
+  if (name === 'livros')    loadLivros();
+  if (name === 'pedidos')   loadPedidos();
+}
+
+/* ── Dashboard ──────────────────────────────────────────────────────────────── */
+async function loadDashboard() {
+  try {
+    const s = await api('/admin/stats');
+    const grid = document.getElementById('stats-grid');
+    const labels = ['total','novos','em_contato','publicando','encerrados','ultimos_7_dias'];
+    const names  = ['Total de leads','Novos','Em contato','Publicando','Encerrados','Últimos 7 dias'];
+    grid.innerHTML = labels.map((k,i) => `
+      <div class="stat-card"><div class="num">${s[k] || 0}</div><div class="lbl">${names[i]}</div></div>
+    `).join('');
+    // badge
+    const badge = document.getElementById('badge-novos');
+    if (s.novos > 0) { badge.textContent = s.novos; badge.style.display = ''; }
+    else badge.style.display = 'none';
+  } catch {}
+}
+
+/* ── Leads ──────────────────────────────────────────────────────────────────── */
+async function loadLeads() {
+  const busca   = document.getElementById('lead-busca').value;
+  const obj     = document.getElementById('lead-objetivo').value;
+  const status  = document.getElementById('lead-status').value;
+  const params  = new URLSearchParams();
+  if (busca)  params.set('busca',   busca);
+  if (obj)    params.set('objetivo', obj);
+  if (status) params.set('status',  status);
+
+  const tbody = document.getElementById('leads-tbody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>';
+  try {
+    const leads = await api('/admin/leads?' + params);
+    if (!leads.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <h3>Nenhum lead encontrado</h3><p>Ajuste os filtros ou aguarde novos contatos.</p>
+      </div></td></tr>`;
+      return;
+    }
+    const objLabel = { publicar:'Publicar livro', orcamento:'Orçamento', parceria:'Parceria', duvidas:'Dúvidas', imprensa:'Imprensa', suporte:'Suporte' };
+    tbody.innerHTML = leads.map(l => `
+      <tr>
+        <td>
+          <div class="cell-title">${esc(l.nome)}</div>
+          <div class="cell-sub"><a href="mailto:${esc(l.email)}" style="color:var(--red)">${esc(l.email)}</a></div>
+        </td>
+        <td>${esc(objLabel[l.objetivo] || l.objetivo || '—')}</td>
+        <td>${l.whatsapp ? `<a href="https://wa.me/55${l.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:var(--red)">${esc(l.whatsapp)}</a>` : '—'}</td>
+        <td><span class="status-badge status-${l.status || 'novo'}">${statusLabel(l.status)}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">${fmtDate(l.criado_em)}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="openModalLead(${l.id})">Ver</button>
+        </td>
+      </tr>`).join('');
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:20px">Erro ao carregar leads.</td></tr>`;
+  }
+}
+
+async function openModalLead(id) {
+  currentLeadId = id;
+  const lead = await api('/admin/leads/' + id);
+  const body = document.getElementById('modal-lead-body');
+  const objLabel = { publicar:'📖 Publicar livro', orcamento:'💰 Orçamento editorial', parceria:'🤝 Parceria', duvidas:'❓ Dúvidas gerais', imprensa:'📰 Imprensa', suporte:'🛠 Suporte' };
+  body.innerHTML = `
+    <div class="detail-grid" style="margin-bottom:20px">
+      <div class="detail-item"><label>Nome</label><span>${esc(lead.nome)}</span></div>
+      <div class="detail-item"><label>E-mail</label><span><a href="mailto:${esc(lead.email)}" style="color:var(--red)">${esc(lead.email)}</a></span></div>
+      <div class="detail-item"><label>WhatsApp</label><span>${lead.whatsapp ? `<a href="https://wa.me/55${lead.whatsapp.replace(/\D/g,'')}" target="_blank" style="color:var(--red)">${esc(lead.whatsapp)}</a>` : '—'}</span></div>
+      <div class="detail-item"><label>Cidade</label><span>${esc(lead.cidade || '—')}</span></div>
+      <div class="detail-item"><label>Objetivo</label><span>${esc(objLabel[lead.objetivo] || lead.objetivo || '—')}</span></div>
+      <div class="detail-item"><label>Recebido em</label><span>${fmtDate(lead.criado_em)}</span></div>
+      ${lead.genero ? `<div class="detail-item"><label>Gênero</label><span>${esc(lead.genero)}</span></div>` : ''}
+      ${lead.finalizado ? `<div class="detail-item"><label>Livro finalizado</label><span>${esc(lead.finalizado)}</span></div>` : ''}
+      ${lead.paginas ? `<div class="detail-item"><label>Páginas</label><span>${lead.paginas}</span></div>` : ''}
+      ${lead.obj_livro ? `<div class="detail-item full"><label>Objetivo do livro</label><span>${esc(lead.obj_livro)}</span></div>` : ''}
+      ${lead.prazo ? `<div class="detail-item"><label>Prazo desejado</label><span>${esc(lead.prazo)}</span></div>` : ''}
+      ${lead.mensagem ? `<div class="detail-item full"><label>Mensagem</label><div class="detail-msg">${esc(lead.mensagem)}</div></div>` : ''}
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Status</label>
+      <select id="lead-status-sel">
+        <option value="novo"        ${lead.status==='novo'?'selected':''}>Novo</option>
+        <option value="em_contato"  ${lead.status==='em_contato'?'selected':''}>Em contato</option>
+        <option value="publicando"  ${lead.status==='publicando'?'selected':''}>Publicando</option>
+        <option value="encerrado"   ${lead.status==='encerrado'?'selected':''}>Encerrado</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Anotação interna</label>
+      <textarea id="lead-anotacao" placeholder="Notas sobre este lead…">${esc(lead.anotacao || '')}</textarea>
+    </div>`;
+  document.getElementById('modal-lead').classList.add('open');
+}
+
+async function salvarLead() {
+  const status   = document.getElementById('lead-status-sel').value;
+  const anotacao = document.getElementById('lead-anotacao').value;
+  try {
+    await api('/admin/leads/' + currentLeadId, { method: 'PATCH', body: { status, anotacao } });
+    toast('Lead atualizado!', 'success');
+    closeModalLead();
+    loadLeads();
+    loadDashboard();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function closeModalLead() {
+  document.getElementById('modal-lead').classList.remove('open');
+  currentLeadId = null;
+}
+
+/* ── Livros ─────────────────────────────────────────────────────────────────── */
+async function loadLivros() {
+  const busca  = document.getElementById('livro-busca').value;
+  const genero = document.getElementById('livro-genero').value;
+  const params = new URLSearchParams();
+  if (busca)  params.set('busca',  busca);
+  if (genero) params.set('genero', genero);
+
+  const tbody = document.getElementById('livros-tbody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>';
+  try {
+    const livros = await api('/admin/books?' + params);
+    if (!livros.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12"/></svg>
+        <h3>Nenhum livro cadastrado</h3>
+        <p>Clique em "Novo livro" para adicionar o primeiro título ao catálogo.</p>
+      </div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = livros.map(l => `
+      <tr>
+        <td>
+          ${l.capa
+            ? `<img src="${esc(l.capa)}" class="capa-thumb" alt="${esc(l.titulo)}" onerror="this.style.display='none'">`
+            : `<div class="capa-placeholder"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/></svg></div>`
+          }
+        </td>
+        <td>
+          <div class="cell-title">${esc(l.titulo)}</div>
+          <div class="cell-sub">${esc(l.autor)}</div>
+        </td>
+        <td>${esc(l.genero || '—')}</td>
+        <td style="font-weight:600">${fmtBRL(l.preco)}</td>
+        <td>
+          <span style="color:${l.estoque <= 3 ? '#dc2626' : 'var(--text)'}">
+            ${l.estoque}
+          </span>
+        </td>
+        <td style="display:flex;gap:6px;align-items:center">
+          <button class="btn btn-secondary btn-sm" onclick="openModalLivroEditar(${l.id})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="deletarLivro(${l.id}, '${esc(l.titulo)}')">Excluir</button>
+        </td>
+      </tr>`).join('');
+  } catch {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:20px">Erro ao carregar livros.</td></tr>`;
+  }
+}
+
+function openModalLivro() {
+  document.getElementById('modal-livro-title').textContent = 'Novo livro';
+  document.getElementById('livro-id').value       = '';
+  document.getElementById('livro-titulo').value   = '';
+  document.getElementById('livro-autor').value    = '';
+  document.getElementById('livro-preco').value    = '';
+  document.getElementById('livro-estoque').value  = '1';
+  document.getElementById('livro-genero-form').value   = '';
+  document.getElementById('livro-capa').value     = '';
+  document.getElementById('livro-descricao').value = '';
+  document.getElementById('modal-livro').classList.add('open');
+  setTimeout(() => document.getElementById('livro-titulo').focus(), 100);
+}
+
+async function openModalLivroEditar(id) {
+  try {
+    const l = await api('/books/' + id);
+    document.getElementById('modal-livro-title').textContent = 'Editar livro';
+    document.getElementById('livro-id').value       = l.id;
+    document.getElementById('livro-titulo').value   = l.titulo;
+    document.getElementById('livro-autor').value    = l.autor;
+    document.getElementById('livro-preco').value    = l.preco;
+    document.getElementById('livro-estoque').value  = l.estoque;
+    document.getElementById('livro-genero-form').value   = l.genero || '';
+    document.getElementById('livro-capa').value     = l.capa || '';
+    document.getElementById('livro-descricao').value = l.descricao || '';
+    document.getElementById('modal-livro').classList.add('open');
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+function closeModalLivro() {
+  document.getElementById('modal-livro').classList.remove('open');
+}
+
+async function salvarLivro() {
+  const id       = document.getElementById('livro-id').value;
+  const titulo   = document.getElementById('livro-titulo').value.trim();
+  const autor    = document.getElementById('livro-autor').value.trim();
+  const preco    = document.getElementById('livro-preco').value;
+  const estoque  = document.getElementById('livro-estoque').value;
+  const genero   = document.getElementById('livro-genero-form').value;
+  const capa     = document.getElementById('livro-capa').value.trim();
+  const descricao = document.getElementById('livro-descricao').value.trim();
+
+  if (!titulo || !autor || !preco) { toast('Preencha título, autor e preço.', 'error'); return; }
+
+  const btn = document.getElementById('btn-salvar-livro');
+  btn.disabled = true;
+  try {
+    if (id) {
+      await api('/admin/books/' + id, { method: 'PUT', body: { titulo, autor, preco, estoque, genero, capa, descricao } });
+      toast('Livro atualizado!', 'success');
+    } else {
+      await api('/admin/books', { method: 'POST', body: { titulo, autor, preco, estoque, genero, capa, descricao } });
+      toast('Livro adicionado ao catálogo!', 'success');
+    }
+    closeModalLivro();
+    loadLivros();
+  } catch (e) { toast(e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+async function deletarLivro(id, titulo) {
+  if (!confirm(`Excluir "${titulo}"? Esta ação não pode ser desfeita.`)) return;
+  try {
+    await api('/admin/books/' + id, { method: 'DELETE' });
+    toast('Livro removido.', 'success');
+    loadLivros();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+/* ── Pedidos ────────────────────────────────────────────────────────────────── */
+async function loadPedidos() {
+  const busca  = document.getElementById('pedido-busca').value;
+  const status = document.getElementById('pedido-status').value;
+  const params = new URLSearchParams();
+  if (busca)  params.set('busca',  busca);
+  if (status) params.set('status', status);
+
+  const tbody = document.getElementById('pedidos-tbody');
+  tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>Carregando…</p></div></td></tr>';
+  try {
+    const pedidos = await api('/admin/orders?' + params);
+    if (!pedidos.length) {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
+        <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg>
+        <h3>Nenhum pedido encontrado</h3><p>Os pedidos aparecerão aqui quando clientes finalizarem compras.</p>
+      </div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = pedidos.map(p => `
+      <tr>
+        <td style="font-weight:700;color:var(--red)">#${p.id}</td>
+        <td>
+          <div class="cell-title">${esc(p.cliente_nome)}</div>
+          <div class="cell-sub">${esc(p.cliente_email)}</div>
+        </td>
+        <td style="font-weight:600">${fmtBRL(p.total)}</td>
+        <td><span class="status-badge status-${p.status}">${statusPedidoLabel(p.status)}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">${fmtDate(p.criado_em)}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="openModalPedido(${JSON.stringify(p).replace(/"/g,'&quot;')})">Ver</button>
+        </td>
+      </tr>`).join('');
+  } catch {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#dc2626;padding:20px">Erro ao carregar pedidos.</td></tr>`;
+  }
+}
+
+function openModalPedido(pedido) {
+  currentPedidoId = pedido.id;
+  document.getElementById('modal-pedido-title').textContent = 'Pedido #' + pedido.id;
+  const itens = (pedido.itens || []).filter(i => i && i.titulo);
+  document.getElementById('modal-pedido-body').innerHTML = `
+    <div class="detail-grid" style="margin-bottom:20px">
+      <div class="detail-item"><label>Cliente</label><span>${esc(pedido.cliente_nome)}</span></div>
+      <div class="detail-item"><label>E-mail</label><span><a href="mailto:${esc(pedido.cliente_email)}" style="color:var(--red)">${esc(pedido.cliente_email)}</a></span></div>
+      <div class="detail-item"><label>Total</label><span style="font-weight:700">${fmtBRL(pedido.total)}</span></div>
+      <div class="detail-item"><label>Data</label><span>${fmtDate(pedido.criado_em)}</span></div>
+    </div>
+    ${itens.length ? `
+    <div style="margin-bottom:20px">
+      <div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Itens do pedido</div>
+      ${itens.map(i => `
+        <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.88rem">
+          <span>${esc(i.titulo)} × ${i.quantidade}</span>
+          <span style="font-weight:600">${fmtBRL(i.preco_unitario * i.quantidade)}</span>
+        </div>`).join('')}
+    </div>` : ''}
+    <div class="form-group">
+      <label>Status do pedido</label>
+      <select id="pedido-status-sel">
+        <option value="pendente"   ${pedido.status==='pendente'?'selected':''}>Pendente</option>
+        <option value="confirmado" ${pedido.status==='confirmado'?'selected':''}>Confirmado</option>
+        <option value="enviado"    ${pedido.status==='enviado'?'selected':''}>Enviado</option>
+        <option value="entregue"   ${pedido.status==='entregue'?'selected':''}>Entregue</option>
+        <option value="cancelado"  ${pedido.status==='cancelado'?'selected':''}>Cancelado</option>
+      </select>
+    </div>`;
+  document.getElementById('modal-pedido').classList.add('open');
+}
+
+async function salvarPedido() {
+  const status = document.getElementById('pedido-status-sel').value;
+  try {
+    await api('/admin/orders/' + currentPedidoId, { method: 'PATCH', body: { status } });
+    toast('Pedido atualizado!', 'success');
+    document.getElementById('modal-pedido').classList.remove('open');
+    loadPedidos();
+  } catch (e) { toast(e.message, 'error'); }
+}
+
+/* ── Utilities ──────────────────────────────────────────────────────────────── */
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function fmtBRL(v) {
+  return new Intl.NumberFormat('pt-BR', { style:'currency', currency:'BRL' }).format(v || 0);
+}
+function statusLabel(s) {
+  return { novo:'Novo', em_contato:'Em contato', publicando:'Publicando', encerrado:'Encerrado' }[s] || s || 'Novo';
+}
+function statusPedidoLabel(s) {
+  return { pendente:'Pendente', confirmado:'Confirmado', enviado:'Enviado', entregue:'Entregue', cancelado:'Cancelado' }[s] || s;
+}
+function toast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+/* ── Close modals on overlay click ─────────────────────────────────────────── */
+['modal-livro','modal-lead','modal-pedido'].forEach(id => {
+  document.getElementById(id).addEventListener('click', e => {
+    if (e.target === document.getElementById(id)) {
+      document.getElementById(id).classList.remove('open');
+    }
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['modal-livro','modal-lead','modal-pedido'].forEach(id =>
+      document.getElementById(id).classList.remove('open')
+    );
+  }
+});
+</script>
+</body>
+</html>
