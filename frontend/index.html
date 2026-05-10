@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <!-- ── Announcement Bar ─────────────────────────────── 
+  <!-- ── Announcement Bar ─────────────────────────────── -->
 <div class="announce-bar">
   <div class="announce-track">
     <span class="announce-item"> Frete grátis em pedidos acima de R$ 150</span>
@@ -23,7 +23,7 @@
     <span class="announce-sep">✦</span>
     <span class="announce-item"> Mais de 500 autores publicados pela Beaver Books</span>
     <span class="announce-sep">✦</span>
-    !-- Duplicado para loop infinito --
+    <!-- Duplicado para loop infinito -->
     <span class="announce-item"> Frete grátis em pedidos acima de R$ 150</span>
     <span class="announce-sep">✦</span>
     <span class="announce-item"> Autores brasileiros que têm algo genuíno a dizer</span>
@@ -36,7 +36,6 @@
     <span class="announce-sep">✦</span>
   </div>
 </div> 
--->
 
 <!-- HEADER -->
 <header>
@@ -59,114 +58,112 @@
   </div>
 </header>
 
-<!-- HERO -->
-<section id="inicio" class="hero hero-fullbleed">
-  <!-- Decorative elements -->
-  <div class="hero-deco-line"></div>
-
-  <div class="hero-main-inner">
-
-    <!-- LEFT: Text content -->
-    <div class="hero-left">
-      <p class="hero-eyebrow">Editora independente · Desde 2016</p>
-
-      <h1 class="hero-headline">
-        Transformamos<br>
-        <em>ideias</em> em<br>
-        livros publicados.
-      </h1>
-
-      <p class="hero-subheadline">
-        Escreva. Publique. Posicione sua história no mundo.<br>
-        Somos uma editora comprometida com autores que têm algo genuíno a dizer — oferecemos suporte editorial completo, da revisão ao lançamento.
-      </p>
-
-      <!-- CTA Buttons -->
-      <div class="hero-ctas">
-        <a href="contato-beaver-books.html" class="btn btn-primary hero-cta-main">
-          <span>Publicar meu livro</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<!-- CARROSEL DE BANNERS -->
+<section id="inicio" style="width:100%;padding:0;margin:0;background:transparent;">
+  <div class="bb-carousel" id="bbCarousel">
+    <div class="bb-carousel-track" id="bbTrack">
+      <div class="bb-slide">
+        <a href="contato-beaver-books.html">
+          <img src="Imagens/Beaver Books Banner.jpeg" alt="Beaver Books Banner"/>
         </a>
-        <a href="tel:+55 11 98172-5028" class="btn btn-ghost hero-cta-sec">Fale com um especialista</a>
-        <!--<a href="#servicos" class="btn btn-ghost hero-cta-sec">Fale com um especialista</a> -->
       </div>
-
-      <!-- Trust indicators -->
-      <div class="hero-trust">
-        <div class="hero-trust-item">
-          <span class="trust-num">+250</span>
-          <span class="trust-label">Títulos publicados</span>
-        </div>
-        <div class="hero-trust-divider"></div>
-        <div class="hero-trust-item">
-          <span class="trust-num">+150</span>
-          <span class="trust-label">Autores ativos</span>
-        </div>
-        <div class="hero-trust-divider"></div>
-        <div class="hero-trust-item">
-          <span class="trust-num">10</span>
-          <span class="trust-label">Anos de mercado</span>
-        </div>
+      <div class="bb-slide">
+        <img src="Imagens/Brain Connections Banner.jpeg" alt="Brain Connections Banner"/>
       </div>
     </div>
 
-    <!-- RIGHT: Visual stack -->
-    <div class="hero-right">
-      <!-- Main feature card — book mockup -->
-      <div class="hero-visual-stack">
+    <!-- Setas -->
+    <button class="bb-arrow bb-prev" onclick="bbMove(-1)" aria-label="Anterior">&#8249;</button>
+    <button class="bb-arrow bb-next" onclick="bbMove(1)" aria-label="Próximo">&#8250;</button>
 
-        <div class="hero-book-scene">
-          <!-- Book mockup -->
-          <div class="book-mockup">
-            <div class="book-cover-face">
-              <div class="book-cover-red-bar"></div>
-              <p class="book-cover-label">Lançamento</p>
-              <p class="book-cover-ttl">O Silêncio<br>das Marés</p>
-              <p class="book-cover-auth">Ana Costa</p>
-            </div>
-            <div class="book-spine"></div>
-          </div>
-
-          <!-- Floating author card -->
-          <div class="hero-float-card author-card">
-            <div class="float-avatar">M</div>
-            <div class="float-text">
-              <strong>Marcos Feitosa</strong>
-              <span>7 títulos publicados</span>
-            </div>
-          </div>
-
-          <!-- Floating launch card -->
-          <div class="hero-float-card launch-card">
-            <div class="launch-icon">🚀</div>
-            <div class="float-text">
-              <strong>Novo lançamento</strong>
-              <span>Distribuição nacional</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Editorial promise strip -->
-        <div class="hero-promise-strip">
-          <div class="promise-item">
-            <span class="promise-icon">✏️</span>
-            <span>Revisão especializada</span>
-          </div>
-          <div class="promise-sep">·</div>
-          <div class="promise-item">
-            <span class="promise-icon">🎨</span>
-            <span>Design de capa</span>
-          </div>
-          <div class="promise-sep">·</div>
-          <div class="promise-item">
-            <span class="promise-icon">📦</span>
-            <span>Distribuição nacional</span>
-          </div>
-        </div>
-
-      </div>
+    <!-- Dots -->
+    <div class="bb-dots" id="bbDots">
+      <span class="bb-dot active" onclick="bbGoTo(0)"></span>
+      <span class="bb-dot" onclick="bbGoTo(1)"></span>
     </div>
   </div>
+
+  <style>
+    .bb-carousel {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: none;
+    }
+    .bb-carousel-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .bb-slide {
+      min-width: 100%;
+    }
+    .bb-slide img {
+      width: 100%;
+      display: block;
+      border-radius: 0;
+      object-fit: cover;
+    }
+    .bb-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      font-size: 40px;
+      line-height: 1;
+      cursor: pointer;
+      color: rgba(255,255,255,0.5);
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      z-index: 10;
+      padding: 0;
+    }
+    .bb-arrow:hover { opacity: 1; }
+    .bb-prev { left: 10px; }
+    .bb-next { right: 10px; }
+    .bb-dots {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .bb-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .bb-dot.active { background: #fff; }
+    @media (max-width: 600px) {
+      .bb-arrow { width: 34px; height: 34px; font-size: 22px; }
+    }
+  </style>
+
+  <script>
+    let bbCurrent = 0;
+    const bbTotal = 2;
+    function bbMove(dir) {
+      bbCurrent = (bbCurrent + dir + bbTotal) % bbTotal;
+      bbUpdate();
+    }
+    function bbGoTo(idx) {
+      bbCurrent = idx;
+      bbUpdate();
+    }
+    function bbUpdate() {
+      document.getElementById('bbTrack').style.transform = `translateX(-${bbCurrent * 100}%)`;
+      document.querySelectorAll('.bb-dot').forEach((d, i) => d.classList.toggle('active', i === bbCurrent));
+    }
+    setInterval(() => bbMove(1), 5000);
+  </script>
 </section>
 
 <!-- SERVIÇOS EDITORIAIS -->
@@ -260,57 +257,6 @@
         </div>
         <h3>Marketing e assessoria</h3>
         <p>Estratégia de lançamento, press releases, parcerias com influenciadores literários e presença em feiras do livro.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- DEPOIMENTOS -->
-<section id="depoimentos">
-  <div class="container">
-    <div class="section-header">
-      <div>
-        <p class="section-label">Depoimentos</p>
-        <h2 class="section-title">O que nossos autores dizem</h2>
-        <p class="section-desc">A experiência de quem confiou sua obra à Beaver Books.</p>
-      </div>
-    </div>
-    <div class="depoimentos-grid">
-      <div class="depo-card">
-        <div class="stars">★★★★★</div>
-        <div class="depo-quote">"</div>
-        <blockquote>A Beaver Books foi além de uma editora — foi uma parceira verdadeira. Da revisão ao lançamento, me senti ouvida e respeitada em cada decisão artística.</blockquote>
-        <div class="depo-author">
-          <div class="depo-avatar">A</div>
-          <div>
-            <strong>Ana Costa</strong>
-            <span>Autora de "O Silêncio das Marés"</span>
-          </div>
-        </div>
-      </div>
-      <div class="depo-card">
-        <div class="stars">★★★★★</div>
-        <div class="depo-quote">"</div>
-        <blockquote>Profissionalismo e cuidado em cada etapa. O design de capa superou minhas expectativas, e a distribuição foi impecável. Meu livro está em todo o Brasil.</blockquote>
-        <div class="depo-author">
-          <div class="depo-avatar">M</div>
-          <div>
-            <strong>Marcos Feitosa</strong>
-            <span>Autor de "Territórios do Esquecimento"</span>
-          </div>
-        </div>
-      </div>
-      <div class="depo-card">
-        <div class="stars">★★★★★</div>
-        <div class="depo-quote">"</div>
-        <blockquote>Escolher a Beaver Books foi a melhor decisão da minha carreira. A equipe editorial tem uma sensibilidade única para entender o que o texto precisa.</blockquote>
-        <div class="depo-author">
-          <div class="depo-avatar">L</div>
-          <div>
-            <strong>Lucia Maia</strong>
-            <span>Autora de "A Física das Despedidas"</span>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -462,7 +408,7 @@
 </section>
 -->
 
-<!-- LIVROS 
+<!-- LIVROS -->
 <section id="livros">
   <div class="container">
     <div class="section-header">
@@ -471,69 +417,14 @@
         <h2 class="section-title">Nossos livros</h2>
         <p class="section-desc">Conheça os títulos em destaque do nosso catálogo.</p>
       </div>
-      <a href="../catálogo-livro-beaver-books/catalogo.html" class="btn btn-primary" style="background:transparent;color:var(--red);border:1.5px solid var(--red)">Ver catálogo completo</a>
+      <a href="catalogo.html" class="btn btn-primary" style="background:transparent;color:var(--red);border:1.5px solid var(--red)">Ver catálogo completo</a>
     </div>
-    <div class="livros-grid">
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#1a0a10;--bg2:#3a0d1f">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">O Silêncio das Marés</p>
-            <p class="book-cover-author">ANA COSTA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Romance</p>
-          <p class="book-title">O Silêncio das Marés</p>
-          <p class="book-author">Ana Costa</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#0a1a15;--bg2:#0d3a28">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">Territórios do Esquecimento</p>
-            <p class="book-cover-author">MARCOS FEITOSA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Ficção Literária</p>
-          <p class="book-title">Territórios do Esquecimento</p>
-          <p class="book-author">Marcos Feitosa</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#0d0d2e;--bg2:#1a1a5e">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">A Física das Despedidas</p>
-            <p class="book-cover-author">LUCIA MAIA</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Não-Ficção</p>
-          <p class="book-title">A Física das Despedidas</p>
-          <p class="book-author">Lucia Maia</p>
-        </div>
-      </div>
-      <div class="book-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="book-cover">
-          <div class="book-cover-inner" style="--bg:#1a110a;--bg2:#3a1f0d">
-            <div class="book-cover-deco"></div>
-            <p class="book-cover-title">Raízes do Amanhã</p>
-            <p class="book-cover-author">PEDRO LEMOS</p>
-          </div>
-        </div>
-        <div class="book-info">
-          <p class="book-genre">Ensaio</p>
-          <p class="book-title">Raízes do Amanhã</p>
-          <p class="book-author">Pedro Lemos</p>
-        </div>
-      </div>
+    <div class="livros-grid" id="livros-grid">
+      <!-- preenchido dinamicamente via JS -->
     </div>
   </div>
 </section>
--->
+
 <!-- AUTORES -->
 <section id="autores">
   <div class="container">
@@ -574,7 +465,7 @@
   </div>
 </section>
 
-<!-- BLOG 
+<!-- BLOG -->
 <section id="blog">
   <div class="container">
     <div class="section-header">
@@ -583,11 +474,11 @@
         <h2 class="section-title">Do mundo editorial</h2>
         <p class="section-desc">Artigos, entrevistas e reflexões sobre literatura, escrita e o mercado editorial.</p>
       </div>
-        <a href="#blog" class="btn btn-outline">Ver todos os posts</a> 
+        <!-- <a href="#blog" class="btn btn-outline">Ver todos os posts</a> -->
     </div>
     <div class="blog-grid">
       <div class="post-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="post-thumb">📖</div>
+        <div class="post-thumb"><img src="Imagens/Imagem Blog 1.png" alt="Audiobook no Brasil"></div>
         <div class="post-body">
           <div class="post-meta">
             <span class="post-tag">Mercado</span>
@@ -598,7 +489,7 @@
         </div>
       </div>
       <div class="post-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="post-thumb">✍️</div>
+        <div class="post-thumb"><img src="Imagens/Imagem Blog 2.jpeg" alt="Estrutura do romance"></div>
         <div class="post-body">
           <div class="post-meta">
             <span class="post-tag">Escrita</span>
@@ -609,7 +500,7 @@
         </div>
       </div>
       <div class="post-card" onclick="location='contato-beaver-books.html'" style="cursor:pointer" role="link" tabindex="0">
-        <div class="post-thumb">🏆</div>
+        <div class="post-thumb"><img src="Imagens/Imagem Blog 3.jpg" alt="Melhor editora independente"></div>
         <div class="post-body">
           <div class="post-meta">
             <span class="post-tag">Prêmios</span>
@@ -622,7 +513,6 @@
     </div>
   </div>
 </section>
--->
 
 <!-- SOBRE NÓS -->
 <section id="sobre">
@@ -702,6 +592,57 @@
               <strong>Inovação editorial</strong>
               <span>Formatos modernos e estratégias de lançamento</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section id="depoimentos">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <p class="section-label">Depoimentos</p>
+        <h2 class="section-title">O que nossos autores dizem</h2>
+        <p class="section-desc">A experiência de quem confiou sua obra à Beaver Books.</p>
+      </div>
+    </div>
+    <div class="depoimentos-grid">
+      <div class="depo-card">
+        <div class="stars">★★★★★</div>
+        <div class="depo-quote">"</div>
+        <blockquote>A Beaver Books foi além de uma editora — foi uma parceira verdadeira. Da revisão ao lançamento, me senti ouvida e respeitada em cada decisão artística.</blockquote>
+        <div class="depo-author">
+          <div class="depo-avatar">A</div>
+          <div>
+            <strong>Ana Costa</strong>
+            <span>Autora de "O Silêncio das Marés"</span>
+          </div>
+        </div>
+      </div>
+      <div class="depo-card">
+        <div class="stars">★★★★★</div>
+        <div class="depo-quote">"</div>
+        <blockquote>Profissionalismo e cuidado em cada etapa. O design de capa superou minhas expectativas, e a distribuição foi impecável. Meu livro está em todo o Brasil.</blockquote>
+        <div class="depo-author">
+          <div class="depo-avatar">M</div>
+          <div>
+            <strong>Marcos Feitosa</strong>
+            <span>Autor de "Territórios do Esquecimento"</span>
+          </div>
+        </div>
+      </div>
+      <div class="depo-card">
+        <div class="stars">★★★★★</div>
+        <div class="depo-quote">"</div>
+        <blockquote>Escolher a Beaver Books foi a melhor decisão da minha carreira. A equipe editorial tem uma sensibilidade única para entender o que o texto precisa.</blockquote>
+        <div class="depo-author">
+          <div class="depo-avatar">L</div>
+          <div>
+            <strong>Lucia Maia</strong>
+            <span>Autora de "A Física das Despedidas"</span>
           </div>
         </div>
       </div>
@@ -813,8 +754,8 @@
     <div class="footer-col">
       <h4>Contato</h4>
       <ul>
-        <li><a href="mailto:contato@beaverbooks.com.br">beaverbooksbr@gmail.com</a></li>
-        <li><a href="tel:+5511300000000">+55 11 98172-5028</a></li>
+        <li><a href="mailto:contato@beaverbooks.com.br">contato@beaverbooks.com.br</a></li>
+        <li><a href="https://wa.me/5511981725028">+55 11 98172-5028</a></li>
         <li><a href="https://maps.google.com/?q=São+Paulo,+SP" target="_blank" rel="noopener noreferrer">São Paulo, SP</a></li>
         <!-- <li><a href="mailto:vagas@beaverbooks.com.br?subject=Trabalhe conosco – Beaver Books">Trabalhe conosco</a></li> -->
       </ul>
@@ -823,11 +764,73 @@
   <div class="footer-bottom">
     <p>© 2026 Beaver Books. Todos os direitos reservados.</p>
     <div style="display:flex;gap:1.5rem">
-      <a href="#sobre">Política de privacidade</a>
+      <a href="politica-de-privacidade.html">Política de privacidade</a>
       <a href="#sobre">Termos de uso</a>
     </div>
   </div>
 </footer>
+
+<script>
+/* ── Livros dinâmicos ────────────────────────────────────────────────────── */
+(function () {
+  const COVER_GRADIENTS = [
+    ['#1a0a10','#3a0d1f'],
+    ['#0a1a15','#0d3a28'],
+    ['#0d0d2e','#1a1a5e'],
+    ['#1a110a','#3a1f0d'],
+    ['#1a1a0a','#3a380d'],
+    ['#0d1a2e','#0d2e5e'],
+  ];
+
+  function escHtml(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function renderLivros(livros) {
+    const grid = document.getElementById('livros-grid');
+    if (!grid) return;
+    if (!livros || livros.length === 0) {
+      grid.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Nenhum livro disponível no momento.</p>';
+      return;
+    }
+    grid.innerHTML = livros.map((l, i) => {
+      const [bg, bg2] = COVER_GRADIENTS[i % COVER_GRADIENTS.length];
+      const coverHtml = l.capa
+        ? `<img src="${escHtml(l.capa)}" alt="${escHtml(l.titulo)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px 8px 0 0;">`
+        : `<div class="book-cover-inner" style="--bg:${bg};--bg2:${bg2}">
+             <div class="book-cover-deco"></div>
+             <p class="book-cover-title">${escHtml(l.titulo)}</p>
+             <p class="book-cover-author">${escHtml(l.autor.toUpperCase())}</p>
+           </div>`;
+      return `
+        <div class="book-card" onclick="location='/livro/${l.id}'" style="cursor:pointer" role="link" tabindex="0">
+          <div class="book-cover">${coverHtml}</div>
+          <div class="book-info">
+            ${l.genero ? `<p class="book-genre">${escHtml(l.genero)}</p>` : ''}
+            <p class="book-title">${escHtml(l.titulo)}</p>
+            <p class="book-author">${escHtml(l.autor)}</p>
+          </div>
+        </div>`;
+    }).join('');
+
+    // aplica fade-in nos novos cards
+    grid.querySelectorAll('.book-card').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+      observer.observe(el);
+    });
+  }
+
+  fetch('/books?limite=4&order_by=recentes')
+    .then(r => r.json())
+    .then(d => renderLivros(d.livros || []))
+    .catch(() => {
+      const grid = document.getElementById('livros-grid');
+      if (grid) grid.innerHTML = '<p style="color:var(--muted);font-size:.9rem">Não foi possível carregar os livros.</p>';
+    });
+})();
+</script>
 
 <script>
   function toggleNav() {
