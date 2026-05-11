@@ -273,7 +273,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
 
 /* Título e autor */
 .book-title {
-  font-family: var(--ff-title);
+  font-family: var(--ff-ui);
   font-size: clamp(1.8rem, 3vw, 2.5rem);
   font-weight: 800;
   line-height: 1.15;
@@ -339,7 +339,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   margin-bottom: 4px;
 }
 .price-main {
-  font-family: var(--ff-title);
+  font-family: var(--ff-ui);
   font-size: 2.4rem;
   font-weight: 700;
   color: var(--ink);
