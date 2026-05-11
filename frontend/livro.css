@@ -664,10 +664,20 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   flex-shrink: 0;
 }
 .author-bio-text h3 {
-  font-family: var(--ff-title);
+  font-family: var(--ff-ui);
   font-size: 1rem;
   font-weight: 700;
   margin-bottom: 6px;
+}
+.author-bio-text h3 a {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1.5px solid var(--border-dark);
+  transition: color .2s, border-color .2s;
+}
+.author-bio-text h3 a:hover {
+  color: var(--red);
+  border-color: var(--red);
 }
 .author-bio-text p {
   font-size: 13.5px;
