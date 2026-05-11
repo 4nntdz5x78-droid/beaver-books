@@ -57,12 +57,14 @@
       list.innerHTML = cart.map(item => `
         <div class="cart-item" data-id="${item.id}">
           ${item.capa
-            ? `<img class="cart-item-thumb" src="${esc(item.capa)}" alt="${esc(item.titulo)}" loading="lazy">`
-            : `<div class="cart-item-thumb-placeholder">
-                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                   <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12"/>
-                 </svg>
-               </div>`}
+            ? `<img class="cart-item-thumb" src="${esc(item.capa)}" alt="${esc(item.titulo)}" loading="lazy"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+            : ''}
+          <div class="cart-item-thumb-placeholder" style="${item.capa ? 'display:none' : ''}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12"/>
+            </svg>
+          </div>
           <div class="cart-item-body">
             <div class="cart-item-title">${esc(item.titulo)}</div>
             <div class="cart-item-author">${esc(item.autor)}</div>
