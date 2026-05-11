@@ -552,7 +552,9 @@ if (orderSelect)  orderSelect.addEventListener('change', applyFilters);
 /* ── Cart Events ──────────────────────────────────────────────────────────── */
 const cartBtn = document.querySelector('.cart-icon, .cart-btn, [data-cart], .btn-cart') ||
                 document.querySelector('button[aria-label*="cart"], button[aria-label*="carrinho"]');
-if (cartBtn)      cartBtn.addEventListener('click', openCart);
+if (cartBtn) cartBtn.addEventListener('click', function() {
+  cartSidebar?.classList.contains('open') ? closeCart() : openCart();
+});
 
 const cartCloseBtn = document.getElementById('cart-close-btn');
 if (cartCloseBtn) cartCloseBtn.addEventListener('click', closeCart);

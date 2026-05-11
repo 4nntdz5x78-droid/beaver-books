@@ -37,6 +37,16 @@
   --radius-md:  10px;
   --radius-lg:  16px;
   --radius-pill: 999px;
+
+  /* aliases para compatibilidade com cart sidebar */
+  --bg-surface:   #ffffff;
+  --bg-card:      #f5f2ee;
+  --border-light: #ccc4bb;
+  --font-serif:   'Playfair Display', serif;
+  --text:         #1c1a17;
+  --text-dim:     #a89f95;
+  --text-muted:   #7a6f63;
+  --red-hover:    #e8183f;
 }
 
 html { scroll-behavior: smooth; }
@@ -103,6 +113,34 @@ header {
 .logo-wrap img { height: 54px; width: auto; }
 
 nav { display: flex; align-items: center; gap: .15rem; }
+.cart-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #f5f2ee;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  transition: color .2s;
+}
+.cart-btn:hover { color: var(--red); }
+.cart-badge {
+  position: absolute;
+  top: 0; right: 0;
+  background: var(--red);
+  color: #fff;
+  font-size: .65rem;
+  font-weight: 700;
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.cart-badge.hidden { display: none; }
 nav a {
   color: rgba(255,255,255,.82);
   font-size: .8rem;

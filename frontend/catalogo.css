@@ -17,6 +17,18 @@
   --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
   --gold:        #f5c842;
   --radius:      20px;
+
+  /* variáveis usadas pelo cart sidebar */
+  --bg-surface:   #ffffff;
+  --surface:      #ffffff;
+  --bg-card:      #f5f2ee;
+  --border-light: #ccc4bb;
+  --font-serif:   'Playfair Display', serif;
+  --shadow:       0 2px 8px rgba(28,26,23,.08);
+  --text:         #1c1a17;
+  --text-dim:     #a89f95;
+  --text-muted:   #7a7268;
+  --red-hover:    #e8183f;
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
@@ -540,7 +552,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   background: none;
   border: none;
   cursor: pointer;
-  color: #3d3530;
+  color: #f5f2ee;
   padding: 6px;
   display: flex;
   align-items: center;

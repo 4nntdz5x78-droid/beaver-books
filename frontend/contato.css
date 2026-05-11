@@ -16,6 +16,18 @@
   --ff-ui:'Inter',sans-serif;
   --glow:        0 0 18px 4px rgba(192,20,60,.55), 0 0 40px 8px rgba(192,20,60,.25);
 
+  /* variáveis usadas pelo cart sidebar */
+  --bg-surface:   #ffffff;
+  --surface:      #ffffff;
+  --font-serif:   'Playfair Display', serif;
+  --radius:       8px;
+  --text:         #1c1a17;
+  --text-muted:   #7a7268;
+  --border-light: #ccc4bb;
+  --text-dim:     #a89f95;
+  --bg-card:      #f5f2ee;
+  --red-hover:    #e8183f;
+  --shadow:       0 2px 8px rgba(28,26,23,.08);
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}

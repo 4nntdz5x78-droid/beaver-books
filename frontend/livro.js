@@ -514,7 +514,10 @@
   function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow=''; }
 
   /* ── Events ─────────────────────────────────────────── */
-  document.getElementById('cart-btn')?.addEventListener('click', openCart);
+  document.getElementById('cart-btn')?.addEventListener('click', function() {
+    const sidebar = document.getElementById('cart-sidebar');
+    sidebar?.classList.contains('open') ? closeCart() : openCart();
+  });
   document.getElementById('cart-close-btn')?.addEventListener('click', closeCart);
   document.getElementById('cart-overlay')?.addEventListener('click', closeCart);
   document.getElementById('checkout-btn')?.addEventListener('click', openCheckout);
