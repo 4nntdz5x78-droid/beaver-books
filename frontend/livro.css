@@ -949,7 +949,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   flex-shrink: 0;
 }
 .cart-header h2 {
-  font-family: var(--ff-title);
+  font-family: var(--ff-ui);
   font-size: 1.2rem;
   font-weight: 700;
 }

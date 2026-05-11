@@ -213,7 +213,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   flex-shrink: 0;
 }
 .cart-header h2 {
-  font-family: var(--font-serif);
+  font-family: var(--ff-ui);
   font-size: 20px;
   font-weight: 700;
 }
