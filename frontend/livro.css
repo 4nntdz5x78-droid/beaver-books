@@ -159,9 +159,13 @@ nav a.cta {
   color: #fff;
   padding: .45rem 1rem;
   margin-left: .4rem;
+  border-radius: var(--radius-sm);
   transition: background .2s, box-shadow .3s, transform .2s;
 }
-nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box-shadow: var(--glow); }
+nav a.cta::after { content: '→'; margin-left: .5rem; transition: .2s; }
+nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,20,60,.3); }
+nav a.cta:hover::after { margin-left: .85rem; }
+nav a.cta:active { transform: none; }
 
 /* ── Breadcrumb ──────────────────────────────────────────────── */
 .breadcrumb {
