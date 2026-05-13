@@ -216,7 +216,7 @@ function renderBooks(livros) {
     const stockLabel = livro.estoque <= 3 ? `Apenas ${livro.estoque} em estoque` : '';
     return `
       <article class="book-card" data-id="${livro.id}" style="cursor:pointer">
-        <div class="book-cover">
+        <div class="book-cover"${livro.capa ? ` style="--cover-url:url('${escHtml(livro.capa)}')"` : ''}>
           ${livro.capa
             ? `<img src="${escHtml(livro.capa)}" alt="${escHtml(livro.titulo)}" loading="lazy">`
             : `<div class="book-cover-placeholder">

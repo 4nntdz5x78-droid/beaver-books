@@ -732,10 +732,24 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   background: var(--bg-surface);
   flex-shrink: 0;
 }
+/* Blurred backdrop — same cover, desfocada, preenche o fundo */
+.book-cover::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  background: var(--cover-url, none) center / cover no-repeat;
+  filter: blur(14px);
+  opacity: .55;
+  z-index: 0;
+  transition: opacity .3s;
+}
+.book-card:hover .book-cover::before { opacity: .7; }
 .book-cover img {
+  position: relative;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  z-index: 1;
   transition: transform .3s;
 }
 .book-card:hover .book-cover img { transform: scale(1.04); }

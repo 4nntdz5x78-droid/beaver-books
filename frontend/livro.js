@@ -93,7 +93,8 @@
     // Cover
     const cc = document.getElementById('cover-container');
     if(b.capa){
-      cc.innerHTML = `<img src="${escHtml(b.capa)}" alt="${escHtml(b.titulo)}" style="width:100%;height:100%;object-fit:cover">`;
+      cc.style.setProperty('--cover-url', `url('${escHtml(b.capa)}')`);
+      cc.innerHTML = `<img src="${escHtml(b.capa)}" alt="${escHtml(b.titulo)}" style="width:100%;height:100%;object-fit:contain;position:relative;z-index:1">`;
     } else {
       cc.innerHTML = `<div class="cover-placeholder">
         <div class="cover-initials">${b.titulo.charAt(0)}</div>
@@ -255,7 +256,7 @@
     document.getElementById('related-section').style.display = 'block';
     document.getElementById('related-grid').innerHTML = filtered.map(l=>`
       <div class="related-card" onclick="window.location.href='livro.html?id=${l.id}'">
-        <div class="related-cover">
+        <div class="related-cover"${l.capa ? ` style="--cover-url:url('${escHtml(l.capa)}')"` : ''}>
           ${l.capa ? `<img src="${escHtml(l.capa)}" alt="${escHtml(l.titulo)}">` : `<div class="related-cover-ph">${l.titulo.charAt(0)}</div>`}
         </div>
         <div class="related-info">
