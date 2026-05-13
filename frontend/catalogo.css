@@ -907,16 +907,19 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   color: var(--text-muted);
   font-size: 14px;
   min-width: 36px;
-  transition: all .2s;
+  cursor: pointer;
+  transition: background .25s, box-shadow .3s, transform .2s, border-color .2s, color .2s;
 }
-.page-btn:hover { border-color: var(--border-light); color: var(--text); }
+.page-btn:hover { background: var(--red-light); border-color: var(--red-light); color: #fff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,20,60,.3); }
+.page-btn:active { transform: none; }
 .page-btn.active {
   background: var(--red);
   border-color: var(--red);
   color: #fff;
-  box-shadow: var(--glow);
+  box-shadow: 0 6px 20px rgba(192,20,60,.3);
 }
-.page-btn:disabled { opacity: .35; cursor: not-allowed; }
+.page-btn.active:hover { background: var(--red-light); }
+.page-btn:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; }
 
  /* ──────────────── FOOTER ──────────────── */
   footer {
