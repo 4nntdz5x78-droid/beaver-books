@@ -1391,6 +1391,15 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     position: relative;
     overflow: hidden;
   }
+  .book-cover::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+    background: var(--cover-url, none) center / cover no-repeat;
+    filter: blur(14px);
+    opacity: .55;
+    z-index: 0;
+  }
 
   .book-cover-inner {
     width: 100%;
