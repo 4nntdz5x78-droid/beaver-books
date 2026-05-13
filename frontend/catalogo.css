@@ -352,7 +352,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   width: 100%;
   background: var(--red);
   border: none;
-  border-radius: var(--radius);
+  border-radius: 999px;
   padding: 13px;
   color: #fff;
   font-size: 15px;
