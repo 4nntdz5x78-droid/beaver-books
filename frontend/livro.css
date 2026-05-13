@@ -909,6 +909,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   z-index: 0;
 }
 .related-cover img { width: 100%; height: 100%; object-fit: contain; display: block; position: relative; z-index: 1; }
+.related-cover img.default-cover { object-fit: cover; }
 .related-cover-ph {
   width: 100%;
   height: 100%;

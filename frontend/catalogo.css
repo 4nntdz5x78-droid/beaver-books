@@ -753,6 +753,8 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   transition: transform .3s;
 }
 .book-card:hover .book-cover img { transform: scale(1.04); }
+/* Capa padrão: ocupa todo o card sem desfoque de fundo */
+.book-cover img.default-cover { object-fit: cover; }
 
 .book-cover-placeholder {
   width: 100%;

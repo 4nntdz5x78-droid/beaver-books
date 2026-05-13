@@ -217,15 +217,12 @@ function renderBooks(livros) {
     return `
       <article class="book-card" data-id="${livro.id}" style="cursor:pointer">
         <div class="book-cover"${livro.capa ? ` style="--cover-url:url('${escHtml(livro.capa)}')"` : ''}>
-          ${livro.capa
-            ? `<img src="${escHtml(livro.capa)}" alt="${escHtml(livro.titulo)}" loading="lazy">`
-            : `<div class="book-cover-placeholder">
-                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                   <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 004 17V5a2 2 0 012-2h14a2 2 0 012 2v12"/>
-                 </svg>
-                 <span>${escHtml(livro.titulo)}</span>
-               </div>`
-          }
+          <img
+            src="${livro.capa ? escHtml(livro.capa) : 'Imagens/capa-padrao.svg'}"
+            alt="${escHtml(livro.titulo)}"
+            loading="lazy"
+            ${!livro.capa ? 'class="default-cover"' : ''}
+          >
           ${livro.genero ? `<span class="genre-badge">${escHtml(livro.genero)}</span>` : ''}
         </div>
         <div class="book-info">

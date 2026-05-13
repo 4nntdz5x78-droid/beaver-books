@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 300" width="200" height="300">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#eee8df"/>
+      <stop offset="100%" stop-color="#ddd5c8"/>
+    </linearGradient>
+    <linearGradient id="spine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#b5201e" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#8c1815" stop-opacity="0.75"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="200" height="300" fill="url(#bg)"/>
+
+  <!-- Left spine accent -->
+  <rect x="0" y="0" width="6" height="300" fill="url(#spine)"/>
+
+  <!-- Subtle inner border -->
+  <rect x="14" y="14" width="172" height="272" fill="none" stroke="#b5a898" stroke-width="0.6" opacity="0.4"/>
+
+  <!-- Open book icon -->
+  <g transform="translate(100, 138)" fill="none" stroke="#8a7060" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.35">
+    <!-- Left page -->
+    <path d="M0,-38 C-6,-40 -22,-40 -36,-34 L-36,30 C-22,24 -6,24 0,22 Z"/>
+    <!-- Right page -->
+    <path d="M0,-38 C6,-40 22,-40 36,-34 L36,30 C22,24 6,24 0,22 Z"/>
+    <!-- Spine crease -->
+    <line x1="0" y1="-38" x2="0" y2="22"/>
+    <!-- Left page lines -->
+    <line x1="-28" y1="-18" x2="-8" y2="-21" opacity="0.7"/>
+    <line x1="-28" y1="-8" x2="-8" y2="-11" opacity="0.7"/>
+    <line x1="-28" y1="2"  x2="-8" y2="-1"  opacity="0.7"/>
+    <line x1="-28" y1="12" x2="-8" y2="9"   opacity="0.5"/>
+    <!-- Right page lines -->
+    <line x1="28" y1="-18" x2="8" y2="-21" opacity="0.7"/>
+    <line x1="28" y1="-8"  x2="8" y2="-11" opacity="0.7"/>
+    <line x1="28" y1="2"   x2="8" y2="-1"  opacity="0.7"/>
+    <line x1="28" y1="12"  x2="8" y2="9"   opacity="0.5"/>
+  </g>
+
+  <!-- Divider line -->
+  <line x1="56" y1="252" x2="144" y2="252" stroke="#9a8878" stroke-width="0.5" opacity="0.35"/>
+
+  <!-- "BEAVER BOOKS" label -->
+  <text
+    x="100" y="270"
+    text-anchor="middle"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="9.5"
+    letter-spacing="3.5"
+    fill="#7a6a5a"
+    opacity="0.55"
+  >BEAVER BOOKS</text>
+</svg>
