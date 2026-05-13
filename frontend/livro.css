@@ -567,9 +567,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   transition: background .25s, box-shadow .3s, transform .2s;
   cursor: pointer;
 }
-.btn-add-cart::after { content: '→'; margin-left: .5rem; transition: .2s; }
 .btn-add-cart:hover:not(:disabled) { background: var(--red-light); box-shadow: 0 6px 20px rgba(192,20,60,.3); transform: translateY(-1px); }
-.btn-add-cart:hover:not(:disabled)::after { margin-left: .85rem; }
 .btn-add-cart:active:not(:disabled) { transform: none; }
 .btn-add-cart:disabled {
   background: var(--border);
@@ -874,9 +872,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   font-family: var(--ff-ui);
   transition: background .2s, box-shadow .3s, transform .2s;
 }
-.review-submit-btn::after { content: '→'; margin-left: .5rem; transition: .2s; }
 .review-submit-btn:hover { background: var(--red-light); box-shadow: 0 6px 20px rgba(192,20,60,.3); transform: translateY(-1px); }
-.review-submit-btn:hover::after { margin-left: .85rem; }
 .review-submit-btn:active { transform: none; }
 
 /* Livros relacionados */
@@ -1114,9 +1110,7 @@ nav a.cta:hover { background: var(--red-light); transform: translateY(-1px); box
   transition: background .25s, box-shadow .3s, transform .2s;
   cursor: pointer;
 }
-.checkout-btn::after { content: '→'; margin-left: .5rem; transition: .2s; }
 .checkout-btn:hover:not(:disabled) { background: var(--red-light); box-shadow: 0 6px 20px rgba(192,20,60,.3); transform: translateY(-1px); }
-.checkout-btn:hover:not(:disabled)::after { margin-left: .85rem; }
 .checkout-btn:active:not(:disabled) { transform: none; }
 .checkout-btn:disabled { background: var(--border); color: var(--muted-light); cursor: not-allowed; }
 .checkout-btn:disabled::after { display: none; }
