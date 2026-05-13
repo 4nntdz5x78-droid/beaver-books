@@ -1128,7 +1128,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
 
   /* ── Benefits Bar ── */
   .benefits-bar {
-    background: #fff;
+    background: var(--body-bg);
     border-top: 1px solid #ede8e2;
     border-bottom: 1px solid #ede8e2;
   }
@@ -1143,31 +1143,33 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   .benefit-item {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 22px 0;
+    gap: 16px;
+    padding: 28px 0;
     flex: 1;
   }
   .benefit-item svg {
-    color: #e6a817;
+    color: var(--red);
     flex-shrink: 0;
+    width: 44px;
+    height: 44px;
   }
   .benefit-item strong {
     display: block;
-    font-size: .85rem;
+    font-size: .95rem;
     font-weight: 700;
     color: #1c1a17;
     font-family: 'Inter', sans-serif;
   }
   .benefit-item span {
     display: block;
-    font-size: .78rem;
+    font-size: .85rem;
     color: #7a7268;
     font-family: 'Inter', sans-serif;
     line-height: 1.4;
   }
   .benefit-divider {
     width: 1px;
-    height: 40px;
+    height: 48px;
     background: #ede8e2;
     flex-shrink: 0;
     margin: 0 8px;
