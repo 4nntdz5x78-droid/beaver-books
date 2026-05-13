@@ -793,6 +793,7 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   flex-direction: column;
   flex: 1;
   gap: 4px;
+  justify-content: flex-start;
 }
 
 .book-title {
@@ -835,7 +836,7 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
 .book-stock.low { color: #e07a2a; }
 
 .add-to-cart-btn {
-  margin-top: 12px;
+  margin-top: auto;
   background: var(--red);
   border: none;
   border-radius: var(--radius);
