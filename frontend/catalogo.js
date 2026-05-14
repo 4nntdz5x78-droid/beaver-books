@@ -151,9 +151,9 @@ async function fetchBooks() {
   if (state.filters.preco_max)   params.set('preco_max', state.filters.preco_max);
   if (state.filters.order_by)    params.set('order_by',  state.filters.order_by);
   params.set('page',   state.page);
-  params.set('limite', 12);
+  params.set('limite', 15);
 
-  renderSkeletons(12);
+  renderSkeletons(15);
 
   try {
     const res  = await fetch(`/books?${params}`);
