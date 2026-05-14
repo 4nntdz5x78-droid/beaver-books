@@ -506,14 +506,91 @@
       const btn=e.target.querySelector('.modal-confirm-btn');
       btn.disabled=true; btn.textContent='Processando…';
       try{
+        // 1. Criar pedido
         const res=await fetch(`${API}/orders`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cliente_nome:nome,cliente_email:email,itens:cart.map(i=>({livro_id:i.id,quantidade:i.quantidade}))})});
         const data=await res.json();
         if(!res.ok||!data.ok) throw new Error(data.erro||'Erro ao processar.');
+
+        // 2. Gerar PIX
+        const pixRes=await fetch(`${API}/payments/pix`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({order_id:data.pedido_id,cliente_nome:nome,cliente_email:email})});
+        const pixData=await pixRes.json();
+
         cart=[]; saveCart(); updateCartUI(); appliedDiscount=0;
-        mc.innerHTML=`<div class="success-state"><div class="success-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><h3>Pedido confirmado!</h3><p>Obrigado, ${escHtml(nome)}!</p><p style="margin-bottom:24px">Entraremos em contato em breve.</p><p style="font-size:13px;color:var(--text-dim);margin-bottom:24px">Nº do pedido: <strong>#${data.pedido_id}</strong></p><button onclick="closeModal()" style="background:var(--red);border:none;border-radius:var(--radius);padding:11px 24px;color:#fff;font-weight:600;cursor:pointer">Continuar comprando</button></div>`;
+
+        if(pixRes.ok && pixData.ok){
+          showPixQRCode(data.pedido_id, pixData, nome);
+        } else {
+          // Fallback: mostrar sucesso sem PIX
+          mc.innerHTML=`<div class="success-state"><div class="success-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><h3>Pedido confirmado!</h3><p>Obrigado, ${escHtml(nome)}!</p><p style="margin-bottom:24px">Entraremos em contato em breve.</p><p style="font-size:13px;color:var(--text-dim);margin-bottom:24px">Nº do pedido: <strong>#${data.pedido_id}</strong></p><button onclick="closeModal()" style="background:var(--red);border:none;border-radius:999px;padding:11px 24px;color:#fff;font-weight:600;cursor:pointer">Continuar comprando</button></div>`;
+        }
       }catch(err){ toast(err.message,'error'); btn.disabled=false; btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Confirmar pedido'; }
     });
   }
+
+  function showPixQRCode(pedidoId, pixData, nome) {
+    const mc = document.getElementById('modal-content');
+    if(!mc) return;
+    const fmtTotal = typeof pixData.total==='number'
+      ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(pixData.total)
+      : 'R$ '+String(pixData.total).replace('.',',');
+
+    mc.innerHTML=`
+      <div class="pix-success">
+        <div class="pix-header">
+          <div class="pix-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <h3>Pedido #${pedidoId} criado!</h3>
+            <p>Escaneie o QR Code para pagar via PIX</p>
+          </div>
+        </div>
+        <div class="pix-qr-wrap">
+          <img src="data:image/png;base64,${pixData.qr_code_base64}" alt="QR Code PIX" class="pix-qr-img"/>
+          <p class="pix-total">Total: <strong>${fmtTotal}</strong></p>
+        </div>
+        <div class="pix-copy-wrap">
+          <p class="pix-copy-label">Ou copie o código PIX:</p>
+          <div class="pix-code-row">
+            <input type="text" class="pix-code-input" value="${pixData.qr_code}" readonly id="pix-code-livro"/>
+            <button class="pix-copy-btn" onclick="copyPixLivro()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              Copiar
+            </button>
+          </div>
+        </div>
+        <div class="pix-info">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>O PIX expira em <strong>30 minutos</strong>. Você receberá a confirmação por e-mail após o pagamento.</span>
+        </div>
+        <div class="pix-status" id="pix-status-livro">
+          <div class="pix-status-dot"></div>
+          Aguardando pagamento...
+        </div>
+        <button onclick="closeModal()" class="modal-cancel-btn" style="width:100%;margin-top:8px">Fechar e continuar comprando</button>
+      </div>`;
+
+    const polling=setInterval(async()=>{
+      try{
+        const r=await fetch(`${API}/payments/status/`+pedidoId);
+        const d=await r.json();
+        if(d.paid){
+          clearInterval(polling);
+          const el=document.getElementById('pix-status-livro');
+          if(el) el.innerHTML='<div class="pix-status-dot paid"></div><strong style="color:#22c55e">Pagamento confirmado! Obrigado!</strong>';
+          toast('PIX recebido! Pedido confirmado!');
+        }
+      }catch(e){ clearInterval(polling); }
+    },5000);
+  }
+
+  function copyPixLivro(){
+    const input=document.getElementById('pix-code-livro');
+    if(!input) return;
+    navigator.clipboard.writeText(input.value);
+    toast('Código PIX copiado!');
+  }
+
   function closeModal(){ document.getElementById('modal-overlay').classList.remove('open'); document.body.style.overflow=''; }
 
   /* ── Events ─────────────────────────────────────────── */
