@@ -219,6 +219,22 @@ nav a.cta:active { transform: none; }
   opacity: .55;
   z-index: 0;
 }
+#cover-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+#cover-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  position: relative;
+  z-index: 1;
+}
 .book-cover-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; position: relative; z-index: 1; }
 
 .cover-placeholder {
