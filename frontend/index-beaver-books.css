@@ -1153,20 +1153,6 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     width: 52px;
     height: 52px;
   }
-  .benefit-icon-pct {
-    color: var(--red);
-    font-size: 3.2rem;
-    font-weight: 800;
-    line-height: 1;
-    flex-shrink: 0;
-    width: 52px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    font-family: 'Inter', sans-serif;
-  }
   .benefit-item strong {
     display: block;
     font-size: 1.05rem;
