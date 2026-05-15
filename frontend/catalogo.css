@@ -1090,7 +1090,8 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
 .pm-option .pm-icon { display: flex; }
 
 /* ── Card Form ───────────────────────────────────────────── */
-.card-form-wrap { display: flex; flex-direction: column; gap: 18px; }
+.card-form-wrap { display: flex; flex-direction: column; gap: 16px; }
+
 .card-form-header {
   display: flex;
   align-items: center;
@@ -1098,41 +1099,62 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   padding-bottom: 16px;
   border-bottom: 1px solid var(--border);
 }
-.card-form-header h3 { margin: 0 0 2px; font-size: 16px; }
-.card-form-header p  { margin: 0; font-size: 13px; color: var(--text-dim); }
+.card-form-header h3 { margin: 0 0 3px; font-size: 16px; font-weight: 700; }
+.card-form-header p  { margin: 0; font-size: 13px; color: var(--text-muted); }
+
 .card-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
+.card-form-grid .form-group { margin-bottom: 0; }
 .card-form-grid .form-group.full { grid-column: 1 / -1; }
+.card-form-grid .form-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 6px;
+}
+
+/* Iframes do MP (número, validade, CVV) */
 .mp-field {
   border: 1.5px solid var(--border);
   border-radius: 8px;
-  padding: 10px 12px;
-  background: var(--card-bg);
-  min-height: 42px;
+  padding: 0 12px;
+  background: #fff;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   transition: border-color .2s;
 }
+.mp-field iframe { width: 100% !important; height: 26px !important; border: none !important; }
 .mp-field:focus-within { border-color: var(--red); }
+
+/* Inputs normais (nome, CPF, parcelas) */
 .mp-input {
   width: 100%;
   border: 1.5px solid var(--border);
   border-radius: 8px;
   padding: 10px 12px;
-  background: var(--card-bg);
-  color: var(--text);
+  background: #fff;
+  color: var(--ink);
   font-size: 14px;
-  font-family: inherit;
+  font-family: var(--ff-ui);
   transition: border-color .2s;
   box-sizing: border-box;
+  -webkit-appearance: none;
 }
 .mp-input:focus { outline: none; border-color: var(--red); }
-.mp-input option { background: var(--card-bg); }
+.mp-input::placeholder { color: #b0a49a; }
+.mp-input option { background: #fff; color: var(--ink); }
+
 .card-form-security {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-dim);
+  color: var(--text-muted);
+  padding-top: 4px;
 }
