@@ -188,26 +188,24 @@ router.post('/card', async (req, res) => {
   }
 });
 
-// ── GET /payments/test-email — testa conexão SMTP ────────────────────────
+// ── GET /payments/test-email — testa envio via Resend ────────────────────
 router.get('/test-email', async (req, res) => {
-  const nodemailer = require('nodemailer');
+  const { Resend } = require('resend');
+  if (!process.env.RESEND_API_KEY)
+    return res.status(500).json({ ok:false, erro:'RESEND_API_KEY não configurada.' });
   try {
-    const transporter = nodemailer.createTransport({
-      host:   process.env.SMTP_HOST || 'smtp.gmail.com',
-      port:   parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
-    });
-    await transporter.verify();
-    await transporter.sendMail({
-      from:    process.env.EMAIL_FROM || process.env.SMTP_USER,
-      to:      process.env.SMTP_USER,
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const to = process.env.SMTP_USER || 'beaverbooksbr@gmail.com';
+    const { data, error } = await resend.emails.send({
+      from:    process.env.EMAIL_FROM || 'Beaver Books <onboarding@resend.dev>',
+      to,
       subject: '✅ Teste de e-mail — Beaver Books',
-      html:    '<p>Conexão SMTP funcionando corretamente!</p>',
+      html:    '<p>Resend funcionando corretamente! 🎉</p>',
     });
-    return res.json({ ok:true, mensagem:`E-mail de teste enviado para ${process.env.SMTP_USER}` });
+    if (error) throw new Error(JSON.stringify(error));
+    return res.json({ ok:true, mensagem:`E-mail de teste enviado para ${to}`, id: data?.id });
   } catch(e) {
-    console.error('Erro SMTP:', e);
+    console.error('Erro Resend:', e);
     return res.status(500).json({ ok:false, erro: e.message });
   }
 });
