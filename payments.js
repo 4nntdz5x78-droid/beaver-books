@@ -1,6 +1,7 @@
 const express = require('express');
 const router  = express.Router();
 const pool    = require('./database');
+const { sendPixEmail, sendCardApprovedEmail, sendCardPendingEmail } = require('./email');
 
 // ── Credenciais ───────────────────────────────────────────────────────────
 const PIX_KEY    = process.env.PIX_KEY    || 'd1817340-5d2d-41d2-bad1-d2d309185d00';
@@ -9,6 +10,18 @@ const PIX_CITY   = process.env.PIX_CITY   || 'SAO PAULO';
 const MP_TOKEN   = process.env.MP_ACCESS_TOKEN;
 const MP_PUB_KEY = process.env.MP_PUBLIC_KEY || '';
 const MP_URL     = 'https://api.mercadopago.com';
+
+// ── Helper: busca itens do pedido com título e autor ─────────────────────
+async function getOrderItens(orderId) {
+  const r = await pool.query(
+    `SELECT oi.quantidade, oi.preco_unitario, b.titulo, b.autor
+     FROM order_items oi
+     JOIN books b ON b.id = oi.livro_id
+     WHERE oi.order_id = $1`,
+    [orderId]
+  );
+  return r.rows;
+}
 
 // ── Gerador de EMV PIX (BR Code) ─────────────────────────────────────────
 function tlv(id, value) {
@@ -63,6 +76,18 @@ router.post('/pix', async (req, res) => {
        SET method='pix', status='pending', amount=$3, qr_code=$4, qr_code_base64=''`,
       [order_id, order_id, total, emv]
     );
+
+    // Disparar e-mail em background (não bloqueia a resposta)
+    getOrderItens(order_id).then(itens => {
+      sendPixEmail({
+        to:       cliente_email,
+        nome:     cliente_nome,
+        pedidoId: order_id,
+        total,
+        itens,
+        pixCode:  emv,
+      }).catch(e => console.error('Erro e-mail PIX:', e));
+    }).catch(() => {});
 
     return res.json({ ok:true, payment_id:order_id, status:'pending', qr_code:emv, qr_code_base64:null, total });
 
@@ -131,6 +156,19 @@ router.post('/card', async (req, res) => {
     if (status === 'approved') {
       await pool.query("UPDATE orders SET status='confirmed' WHERE id=$1", [order_id]);
     }
+
+    // Disparar e-mail em background
+    const emailNome = pedido.rows[0].cliente_nome;
+    const emailTo   = payer.email || pedido.rows[0].cliente_email;
+    getOrderItens(order_id).then(itens => {
+      if (status === 'approved') {
+        sendCardApprovedEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens })
+          .catch(e => console.error('Erro e-mail aprovado:', e));
+      } else if (status === 'in_process') {
+        sendCardPendingEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens })
+          .catch(e => console.error('Erro e-mail pendente:', e));
+      }
+    }).catch(() => {});
 
     return res.json({
       ok:           status !== 'rejected',
