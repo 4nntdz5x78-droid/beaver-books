@@ -104,7 +104,7 @@ router.post('/pix', async (req, res) => {
 
   } catch (err) {
     console.error('Erro pagamento PIX:', err);
-    return res.status(500).json({ ok: false, erro: err.message || 'Erro interno ao processar pagamento.' });
+    return res.status(500).json({ ok: false, erro: String(err), stack: err && err.stack ? err.stack.split('\n')[0] : '' });
   }
 });
 
