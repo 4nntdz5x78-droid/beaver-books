@@ -188,6 +188,24 @@ router.post('/card', async (req, res) => {
   }
 });
 
+// ── GET /payments/test-order-email?to=email — simula e-mail de pedido aprovado ──
+router.get('/test-order-email', async (req, res) => {
+  const to = req.query.to || process.env.SMTP_USER || 'beaverbooksbr@gmail.com';
+  try {
+    await sendCardApprovedEmail({
+      to,
+      nome:     'Caio Ventura',
+      pedidoId: 99,
+      total:    49.90,
+      itens:    [{ titulo: 'Livro Teste', autor: 'Autor Teste', quantidade: 1, preco_unitario: 49.90 }],
+    });
+    return res.json({ ok:true, mensagem:`E-mail de pedido aprovado enviado para ${to}` });
+  } catch(e) {
+    console.error('Erro test-order-email:', e);
+    return res.status(500).json({ ok:false, erro: e.message });
+  }
+});
+
 // ── GET /payments/test-email — testa envio via Resend ────────────────────
 router.get('/test-email', async (req, res) => {
   const { Resend } = require('resend');
