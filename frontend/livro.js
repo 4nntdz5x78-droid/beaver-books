@@ -729,17 +729,43 @@
 
         if(cardData.approved)       showCardSuccess(pedidoId, nome, total);
         else if(cardData.in_process) showCardPending(pedidoId, nome);
-        else {
-          toast(cardData.erro || 'Cartão recusado. Tente outro ou use PIX.','error');
-          this.disabled=false;
-          this.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pagar '+fmtPrice(total);
-        }
+        else showCardRejected(pedidoId, nome, total, email, cardData.erro);
       } catch(err){
-        toast(err.message||'Erro ao processar cartão.','error');
-        this.disabled=false;
-        this.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pagar '+fmtPrice(total);
+        showCardRejected(pedidoId, nome, total, email, err.message || 'Erro ao processar cartão.');
       }
     });
+  }
+
+  function showCardRejected(pedidoId, nome, total, email, motivo) {
+    const mc = document.getElementById('modal-content');
+    const msg = motivo || 'Cartão recusado pela operadora.';
+    mc.innerHTML = `
+      <div class="success-state">
+        <div class="success-icon" style="background:rgba(220,38,38,.10)">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+        </div>
+        <h3 style="color:#dc2626">Pagamento recusado</h3>
+        <p style="font-size:14px;color:var(--text-dim);margin:6px 0 18px">${escHtml(msg)}</p>
+        <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px">Nº do pedido: <strong>#${pedidoId}</strong></p>
+        <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+          <button onclick="showCardForm(${pedidoId},${total},'${escHtml(nome)}','${escHtml(email)}')"
+            style="background:var(--red);border:none;border-radius:999px;padding:11px 24px;color:#fff;font-weight:600;cursor:pointer;width:100%">
+            Tentar com outro cartão
+          </button>
+          <button onclick="showPixForm(${pedidoId},${total},'${escHtml(nome)}','${escHtml(email)}')"
+            style="background:transparent;border:1.5px solid var(--border);border-radius:999px;padding:10px 24px;color:var(--text);font-weight:500;cursor:pointer;width:100%">
+            Pagar via PIX
+          </button>
+          <button onclick="closeModal()"
+            style="background:transparent;border:none;color:var(--text-dim);font-size:13px;cursor:pointer;padding:4px">
+            Cancelar pedido
+          </button>
+        </div>
+      </div>`;
   }
 
   function showCardSuccess(pedidoId, nome, total) {
@@ -766,6 +792,30 @@
       <p style="font-size:13px;color:var(--text-dim);margin:16px 0">Nº do pedido: <strong>#${pedidoId}</strong></p>
       <button onclick="closeModal()" style="background:var(--red);border:none;border-radius:999px;padding:11px 24px;color:#fff;font-weight:600;cursor:pointer">Fechar</button>
     </div>`;
+  }
+
+  async function showPixForm(pedidoId, total, nome, email) {
+    const mc = document.getElementById('modal-content');
+    mc.innerHTML = `<div style="text-align:center;padding:24px 0">
+      <div class="spinner" style="margin:0 auto 12px"></div>
+      <p style="color:var(--text-dim);font-size:14px">Gerando código PIX…</p>
+    </div>`;
+    try {
+      const pixRes  = await fetch(`${API}/payments/pix`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ order_id: pedidoId, cliente_nome: nome, cliente_email: email })
+      });
+      const pixData = await pixRes.json();
+      if(pixRes.ok && pixData.ok) {
+        showPixQRCode(pedidoId, pixData, nome);
+      } else {
+        mc.innerHTML = `<p style="color:#dc2626;text-align:center;padding:24px">${escHtml(pixData.erro||'Erro ao gerar PIX.')}</p>
+          <div style="text-align:center"><button onclick="closeModal()" style="background:var(--red);border:none;border-radius:999px;padding:10px 22px;color:#fff;font-weight:600;cursor:pointer">Fechar</button></div>`;
+      }
+    } catch(err) {
+      mc.innerHTML = `<p style="color:#dc2626;text-align:center;padding:24px">${escHtml(err.message||'Erro ao gerar PIX.')}</p>
+        <div style="text-align:center"><button onclick="closeModal()" style="background:var(--red);border:none;border-radius:999px;padding:10px 22px;color:#fff;font-weight:600;cursor:pointer">Fechar</button></div>`;
+    }
   }
 
   function makeQRCodeDataURL(text) {
