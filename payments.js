@@ -31,9 +31,10 @@ function buildPixEMV(key, name, city, amount, txId = 'daqr') {
   const pixKey = tlv('01', key);
   const mai    = tlv('26', gui + pixKey);
 
-  // Merchant name / city (máx 25 / 15 chars)
-  const merchantName = name.substring(0, 25).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  const merchantCity = city.substring(0, 15).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  // Merchant name / city (max 25 / 15 chars, ASCII only)
+  const stripDiacritics = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^ -~]/g, '');
+  const merchantName = stripDiacritics(name.substring(0, 25).toUpperCase());
+  const merchantCity = stripDiacritics(city.substring(0, 15).toUpperCase());
 
   // Additional data (txid)
   const txIdSafe = txId.replace(/\W/g, '').substring(0, 25) || '***';
@@ -103,7 +104,7 @@ router.post('/pix', async (req, res) => {
 
   } catch (err) {
     console.error('Erro pagamento PIX:', err);
-    return res.status(500).json({ ok: false, erro: 'Erro interno ao processar pagamento.' });
+    return res.status(500).json({ ok: false, erro: err.message || 'Erro interno ao processar pagamento.' });
   }
 });
 
