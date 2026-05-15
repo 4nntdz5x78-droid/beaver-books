@@ -1,11 +1,65 @@
 const express = require('express');
 const router  = express.Router();
 const pool    = require('./database');
+const QRCode  = require('qrcode');
 
-const MP_TOKEN = process.env.MP_ACCESS_TOKEN;
-const MP_URL   = 'https://api.mercadopago.com';
+// ── Chave PIX Beaver Books ──────────────────────────────────────────────
+const PIX_KEY  = process.env.PIX_KEY  || 'd1817340-5d2d-41d2-bad1-d2d309185d00';
+const PIX_NAME = process.env.PIX_NAME || 'Caio Henrique Ventura';
+const PIX_CITY = process.env.PIX_CITY || 'SAO PAULO';
 
-// ── POST /payments/pix  — gera QR Code PIX ──────────────────────────
+// ── Gerador de EMV PIX (BR Code) ─────────────────────────────────────────
+function tlv(id, value) {
+  const len = String(value.length).padStart(2, '0');
+  return `${id}${len}${value}`;
+}
+
+function crc16(str) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= str.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+    }
+    crc &= 0xFFFF;
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function buildPixEMV(key, name, city, amount, txId = 'daqr') {
+  // Merchant Account Info
+  const gui    = tlv('00', 'BR.GOV.BCB.PIX');
+  const pixKey = tlv('01', key);
+  const mai    = tlv('26', gui + pixKey);
+
+  // Merchant name / city (máx 25 / 15 chars)
+  const merchantName = name.substring(0, 25).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  const merchantCity = city.substring(0, 15).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+  // Additional data (txid)
+  const txIdSafe = txId.replace(/\W/g, '').substring(0, 25) || '***';
+  const addData  = tlv('62', tlv('05', txIdSafe));
+
+  // Amount (obrigatório para PIX dinâmico)
+  const amtStr = parseFloat(amount).toFixed(2);
+
+  const payload =
+    tlv('00', '01') +           // Payload Format Indicator
+    tlv('01', '12') +           // Point of Initiation (12 = dinâmico, reutilizável)
+    mai +                       // Merchant Account Info
+    tlv('52', '0000') +         // MCC
+    tlv('53', '986') +          // Currency (BRL)
+    tlv('54', amtStr) +         // Amount
+    tlv('58', 'BR') +           // Country
+    tlv('59', merchantName) +   // Merchant Name
+    tlv('60', merchantCity) +   // Merchant City
+    addData +                   // Additional Data
+    '6304';                     // CRC placeholder
+
+  return payload + crc16(payload);
+}
+
+// ── POST /payments/pix  — gera QR Code PIX via chave própria ────────────
 router.post('/pix', async (req, res) => {
   const { order_id, cliente_nome, cliente_email } = req.body;
 
@@ -26,59 +80,34 @@ router.post('/pix', async (req, res) => {
     const order = pedido.rows[0];
     const total = parseFloat(order.total);
 
-    // Criar pagamento PIX no Mercado Pago
-    const body = {
-      transaction_amount: total,
-      description: `Pedido #${order_id} — Beaver Books`,
-      payment_method_id: 'pix',
-      payer: {
-        email: cliente_email,
-        first_name: cliente_nome.split(' ')[0],
-        last_name:  cliente_nome.split(' ').slice(1).join(' ') || 'Cliente',
-      },
-      external_reference: String(order_id),
-    };
+    // Gerar código EMV com valor dinâmico
+    const txId   = `BB${order_id}`;
+    const emv    = buildPixEMV(PIX_KEY, PIX_NAME, PIX_CITY, total, txId);
 
-    const mpRes = await fetch(`${MP_URL}/v1/payments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type':   'application/json',
-        'Authorization':  `Bearer ${MP_TOKEN}`,
-        'X-Idempotency-Key': `order-${order_id}-${Date.now()}`,
-      },
-      body: JSON.stringify(body),
+    // Gerar QR Code em base64
+    const qrBase64Raw = await QRCode.toDataURL(emv, {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      scale: 6,
     });
+    // Remove o prefixo "data:image/png;base64," para manter compatível com o frontend
+    const qrBase64 = qrBase64Raw.replace(/^data:image\/png;base64,/, '');
 
-    const mpData = await mpRes.json();
-
-    if (!mpRes.ok || mpData.error) {
-      console.error('MP Error:', mpData);
-      return res.status(500).json({ ok: false, erro: mpData.message || 'Erro ao gerar PIX.' });
-    }
-
-    // Salvar pagamento no banco
+    // Salvar no banco
     await pool.query(
       `INSERT INTO payments (order_id, mp_payment_id, method, status, amount, qr_code, qr_code_base64)
-       VALUES ($1, $2, 'pix', $3, $4, $5, $6)
+       VALUES ($1, $2, 'pix', 'pending', $3, $4, $5)
        ON CONFLICT (order_id) DO UPDATE
-       SET mp_payment_id=$2, status=$3, qr_code=$5, qr_code_base64=$6`,
-      [
-        order_id,
-        mpData.id,
-        mpData.status,
-        total,
-        mpData.point_of_interaction?.transaction_data?.qr_code || '',
-        mpData.point_of_interaction?.transaction_data?.qr_code_base64 || '',
-      ]
+       SET method='pix', status='pending', amount=$3, qr_code=$4, qr_code_base64=$5`,
+      [order_id, `pix-${order_id}`, total, emv, qrBase64]
     );
 
     return res.json({
-      ok: true,
-      payment_id: mpData.id,
-      status:     mpData.status,
-      qr_code:    mpData.point_of_interaction?.transaction_data?.qr_code,
-      qr_code_base64: mpData.point_of_interaction?.transaction_data?.qr_code_base64,
-      expires_at: mpData.date_of_expiration,
+      ok:             true,
+      payment_id:     `pix-${order_id}`,
+      status:         'pending',
+      qr_code:        emv,
+      qr_code_base64: qrBase64,
       total,
     });
 
@@ -88,27 +117,20 @@ router.post('/pix', async (req, res) => {
   }
 });
 
-// ── POST /payments/webhook  — recebe notificações do MP ─────────────
+// ── POST /payments/webhook  — confirmação manual de pagamento ────────────
 router.post('/webhook', async (req, res) => {
   const { type, data } = req.body;
 
   if (type === 'payment') {
     try {
-      const mpRes = await fetch(`${MP_URL}/v1/payments/${data.id}`, {
-        headers: { 'Authorization': `Bearer ${MP_TOKEN}` },
-      });
-      const payment = await mpRes.json();
+      const orderId = data.external_reference || data.order_id;
+      const status  = data.status;
 
-      const orderId = payment.external_reference;
-      const status  = payment.status; // approved, pending, rejected
-
-      // Atualizar status do pagamento no banco
       await pool.query(
-        'UPDATE payments SET status=$1 WHERE mp_payment_id=$2',
-        [status, data.id]
+        'UPDATE payments SET status=$1 WHERE order_id=$2',
+        [status, orderId]
       );
 
-      // Se aprovado, atualizar status do pedido
       if (status === 'approved') {
         await pool.query(
           "UPDATE orders SET status='confirmed' WHERE id=$1",
@@ -125,7 +147,7 @@ router.post('/webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-// ── GET /payments/status/:orderId  — consulta status ────────────────
+// ── GET /payments/status/:orderId  — consulta status ────────────────────
 router.get('/status/:orderId', async (req, res) => {
   try {
     const result = await pool.query(
@@ -137,13 +159,31 @@ router.get('/status/:orderId', async (req, res) => {
     }
     const p = result.rows[0];
     return res.json({
-      status:  p.status,
-      paid:    p.status === 'approved',
-      method:  p.method,
-      amount:  p.amount,
+      status: p.status,
+      paid:   p.status === 'approved',
+      method: p.method,
+      amount: p.amount,
     });
   } catch (err) {
     res.status(500).json({ erro: 'Erro ao consultar status.' });
+  }
+});
+
+// ── POST /payments/confirm/:orderId  — confirmar pagamento manualmente ───
+router.post('/confirm/:orderId', async (req, res) => {
+  try {
+    await pool.query(
+      "UPDATE payments SET status='approved' WHERE order_id=$1",
+      [req.params.orderId]
+    );
+    await pool.query(
+      "UPDATE orders SET status='confirmed' WHERE id=$1",
+      [req.params.orderId]
+    );
+    console.log(`✅ Pedido #${req.params.orderId} confirmado manualmente.`);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, erro: 'Erro ao confirmar.' });
   }
 });
 
