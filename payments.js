@@ -85,17 +85,18 @@ router.post('/pix', async (req, res) => {
     const emv  = buildPixEMV(PIX_KEY, PIX_NAME, PIX_CITY, total, txId);
 
     // Salvar no banco (QR Code será gerado no frontend via CDN)
+    // mp_payment_id é BIGINT no banco — usar order_id como referência numérica
     await pool.query(
       `INSERT INTO payments (order_id, mp_payment_id, method, status, amount, qr_code, qr_code_base64)
        VALUES ($1, $2, 'pix', 'pending', $3, $4, '')
        ON CONFLICT (order_id) DO UPDATE
        SET method='pix', status='pending', amount=$3, qr_code=$4, qr_code_base64=''`,
-      [order_id, `pix-${order_id}`, total, emv]
+      [order_id, order_id, total, emv]
     );
 
     return res.json({
       ok:             true,
-      payment_id:     `pix-${order_id}`,
+      payment_id:     order_id,
       status:         'pending',
       qr_code:        emv,
       qr_code_base64: null,   // gerado no frontend
@@ -104,7 +105,7 @@ router.post('/pix', async (req, res) => {
 
   } catch (err) {
     console.error('Erro pagamento PIX:', err);
-    return res.status(500).json({ ok: false, erro: String(err), stack: err && err.stack ? err.stack.split('\n')[0] : '' });
+    return res.status(500).json({ ok: false, erro: 'Erro interno ao processar pagamento.' });
   }
 });
 
