@@ -729,16 +729,35 @@
 
         if(cardData.approved)       showCardSuccess(pedidoId, nome, total);
         else if(cardData.in_process) showCardPending(pedidoId, nome);
-        else showCardRejected(pedidoId, nome, total, email, cardData.erro);
+        else showCardRejected(pedidoId, nome, total, email, cardData.status_detail);
       } catch(err){
-        showCardRejected(pedidoId, nome, total, email, err.message || 'Erro ao processar cartão.');
+        showCardRejected(pedidoId, nome, total, email, null);
       }
     });
   }
 
-  function showCardRejected(pedidoId, nome, total, email, motivo) {
+  const MP_REJECTION_REASONS = {
+    cc_rejected_insufficient_amount:    'Saldo insuficiente no cartão.',
+    cc_rejected_bad_filled_card_number: 'Número do cartão incorreto.',
+    cc_rejected_bad_filled_date:        'Data de validade incorreta.',
+    cc_rejected_bad_filled_security_code: 'CVV incorreto.',
+    cc_rejected_bad_filled_other:       'Dados do cartão incorretos. Verifique e tente novamente.',
+    cc_rejected_blacklist:              'Cartão bloqueado pela operadora.',
+    cc_rejected_call_for_authorize:     'Ligue para a central do seu cartão para autorizar.',
+    cc_rejected_card_disabled:          'Cartão desabilitado. Entre em contato com sua operadora.',
+    cc_rejected_card_error:             'Erro no cartão. Tente novamente ou use outro cartão.',
+    cc_rejected_duplicated_payment:     'Pagamento duplicado detectado.',
+    cc_rejected_high_risk:              'Transação recusada por segurança. Tente novamente.',
+    cc_rejected_max_attempts:           'Limite de tentativas atingido. Aguarde e tente mais tarde.',
+    cc_rejected_other_reason:           'Recusado pela operadora. Tente outro cartão ou use PIX.',
+    pending_review_manual:              'Pagamento em análise manual pelo Mercado Pago.',
+    pending_contingency:                'Tente novamente em alguns minutos.',
+  };
+
+  function showCardRejected(pedidoId, nome, total, email, statusDetail) {
     const mc = document.getElementById('modal-content');
-    const msg = motivo || 'Cartão recusado pela operadora.';
+    const msg = MP_REJECTION_REASONS[statusDetail]
+      || 'Cartão recusado pela operadora. Tente outro cartão ou use PIX.';
     mc.innerHTML = `
       <div class="success-state">
         <div class="success-icon" style="background:rgba(220,38,38,.10)">
@@ -749,7 +768,8 @@
           </svg>
         </div>
         <h3 style="color:#dc2626">Pagamento recusado</h3>
-        <p style="font-size:14px;color:var(--text-dim);margin:6px 0 18px">${escHtml(msg)}</p>
+        <p style="font-size:14px;color:var(--text-dim);margin:6px 0 10px">${escHtml(msg)}</p>
+        ${statusDetail ? `<p style="font-size:11px;color:var(--text-dim);opacity:.55;margin-bottom:14px;font-family:monospace">${escHtml(statusDetail)}</p>` : ''}
         <p style="font-size:13px;color:var(--text-dim);margin-bottom:20px">Nº do pedido: <strong>#${pedidoId}</strong></p>
         <div style="display:flex;flex-direction:column;gap:10px;width:100%">
           <button onclick="showCardForm(${pedidoId},${total},'${escHtml(nome)}','${escHtml(email)}')"
