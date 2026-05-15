@@ -527,12 +527,31 @@
     });
   }
 
+  function makeQRCodeDataURL(text) {
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(text);
+      qr.make();
+      // Gera SVG e converte para data URL
+      const svg = qr.createSvgTag({ scalable: true });
+      const encoded = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+      return { type: 'svg', url: encoded, svg };
+    } catch(e) {
+      return null;
+    }
+  }
+
   function showPixQRCode(pedidoId, pixData, nome) {
     const mc = document.getElementById('modal-content');
     if(!mc) return;
     const fmtTotal = typeof pixData.total==='number'
       ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(pixData.total)
       : 'R$ '+String(pixData.total).replace('.',',');
+
+    const qrResult = makeQRCodeDataURL(pixData.qr_code);
+    const qrImgHTML = qrResult
+      ? `<img src="${qrResult.url}" alt="QR Code PIX" class="pix-qr-img" style="width:200px;height:200px;display:block;margin:0 auto"/>`
+      : `<p style="color:var(--text-dim);font-size:13px">Use o código abaixo para pagar.</p>`;
 
     mc.innerHTML=`
       <div class="pix-success">
@@ -546,7 +565,7 @@
           </div>
         </div>
         <div class="pix-qr-wrap">
-          <img src="data:image/png;base64,${pixData.qr_code_base64}" alt="QR Code PIX" class="pix-qr-img"/>
+          ${qrImgHTML}
           <p class="pix-total">Total: <strong>${fmtTotal}</strong></p>
         </div>
         <div class="pix-copy-wrap">
@@ -561,7 +580,7 @@
         </div>
         <div class="pix-info">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <span>O PIX expira em <strong>30 minutos</strong>. Você receberá a confirmação por e-mail após o pagamento.</span>
+          <span>Você receberá a confirmação por e-mail após o pagamento.</span>
         </div>
         <div class="pix-status" id="pix-status-livro">
           <div class="pix-status-dot"></div>

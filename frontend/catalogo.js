@@ -399,11 +399,26 @@ async function submitOrder(nome, email) {
 }
 
 
+function makeQRCodeDataURL(text) {
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    const svg = qr.createSvgTag({ scalable: true });
+    return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+  } catch(e) { return null; }
+}
+
 function showPixQRCode(pedidoId, pixData) {
   if (!modalContent) return;
   const total = typeof pixData.total === 'number'
     ? formatPrice(pixData.total)
     : 'R$ ' + String(pixData.total).replace('.', ',');
+
+  const qrUrl = makeQRCodeDataURL(pixData.qr_code);
+  const qrImgHTML = qrUrl
+    ? `<img src="${qrUrl}" alt="QR Code PIX" class="pix-qr-img" style="width:200px;height:200px;display:block;margin:0 auto"/>`
+    : `<p style="color:var(--text-dim);font-size:13px">Use o código abaixo para pagar.</p>`;
 
   modalContent.innerHTML = `
     <div class="pix-success">
@@ -419,7 +434,7 @@ function showPixQRCode(pedidoId, pixData) {
         </div>
       </div>
       <div class="pix-qr-wrap">
-        <img src="data:image/png;base64,${pixData.qr_code_base64}" alt="QR Code PIX" class="pix-qr-img"/>
+        ${qrImgHTML}
         <p class="pix-total">Total: <strong>${total}</strong></p>
       </div>
       <div class="pix-copy-wrap">

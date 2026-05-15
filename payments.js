@@ -1,7 +1,6 @@
 const express = require('express');
 const router  = express.Router();
 const pool    = require('./database');
-const QRCode  = require('qrcode');
 
 // ── Chave PIX Beaver Books ──────────────────────────────────────────────
 const PIX_KEY  = process.env.PIX_KEY  || 'd1817340-5d2d-41d2-bad1-d2d309185d00';
@@ -81,25 +80,16 @@ router.post('/pix', async (req, res) => {
     const total = parseFloat(order.total);
 
     // Gerar código EMV com valor dinâmico
-    const txId   = `BB${order_id}`;
-    const emv    = buildPixEMV(PIX_KEY, PIX_NAME, PIX_CITY, total, txId);
+    const txId = `BB${order_id}`;
+    const emv  = buildPixEMV(PIX_KEY, PIX_NAME, PIX_CITY, total, txId);
 
-    // Gerar QR Code em base64
-    const qrBase64Raw = await QRCode.toDataURL(emv, {
-      errorCorrectionLevel: 'M',
-      margin: 2,
-      scale: 6,
-    });
-    // Remove o prefixo "data:image/png;base64," para manter compatível com o frontend
-    const qrBase64 = qrBase64Raw.replace(/^data:image\/png;base64,/, '');
-
-    // Salvar no banco
+    // Salvar no banco (QR Code será gerado no frontend via CDN)
     await pool.query(
       `INSERT INTO payments (order_id, mp_payment_id, method, status, amount, qr_code, qr_code_base64)
-       VALUES ($1, $2, 'pix', 'pending', $3, $4, $5)
+       VALUES ($1, $2, 'pix', 'pending', $3, $4, '')
        ON CONFLICT (order_id) DO UPDATE
-       SET method='pix', status='pending', amount=$3, qr_code=$4, qr_code_base64=$5`,
-      [order_id, `pix-${order_id}`, total, emv, qrBase64]
+       SET method='pix', status='pending', amount=$3, qr_code=$4, qr_code_base64=''`,
+      [order_id, `pix-${order_id}`, total, emv]
     );
 
     return res.json({
@@ -107,7 +97,7 @@ router.post('/pix', async (req, res) => {
       payment_id:     `pix-${order_id}`,
       status:         'pending',
       qr_code:        emv,
-      qr_code_base64: qrBase64,
+      qr_code_base64: null,   // gerado no frontend
       total,
     });
 
