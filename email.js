@@ -5,7 +5,9 @@ function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
 }
 
-const FROM = process.env.EMAIL_FROM || 'Beaver Books <onboarding@resend.dev>';
+// Resend exige domínio verificado para remetente customizado.
+// Use onboarding@resend.dev até verificar seu domínio no painel do Resend.
+const FROM = process.env.RESEND_FROM || 'Beaver Books <onboarding@resend.dev>';
 
 // ── Helper: formatar preço ────────────────────────────────────────────────
 function fmtBRL(value) {

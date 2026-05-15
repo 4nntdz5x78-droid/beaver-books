@@ -197,7 +197,7 @@ router.get('/test-email', async (req, res) => {
     const resend = new Resend(process.env.RESEND_API_KEY);
     const to = process.env.SMTP_USER || 'beaverbooksbr@gmail.com';
     const { data, error } = await resend.emails.send({
-      from:    process.env.EMAIL_FROM || 'Beaver Books <onboarding@resend.dev>',
+      from:    process.env.RESEND_FROM || 'Beaver Books <onboarding@resend.dev>',
       to,
       subject: '✅ Teste de e-mail — Beaver Books',
       html:    '<p>Resend funcionando corretamente! 🎉</p>',
