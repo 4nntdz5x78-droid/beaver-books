@@ -16,7 +16,7 @@ async function getOrderItens(orderId) {
   const r = await pool.query(
     `SELECT oi.quantidade, oi.preco_unitario, b.titulo, b.autor
      FROM order_items oi
-     JOIN books b ON b.id = oi.livro_id
+     JOIN books b ON b.id = oi.book_id
      WHERE oi.order_id = $1`,
     [orderId]
   );
@@ -78,16 +78,20 @@ router.post('/pix', async (req, res) => {
     );
 
     // Disparar e-mail em background (não bloqueia a resposta)
+    console.log(`📧 PIX: tentando enviar e-mail para ${cliente_email}`);
     getOrderItens(order_id).then(itens => {
-      sendPixEmail({
+      console.log(`📧 PIX: ${itens.length} item(s) encontrado(s) para pedido #${order_id}`);
+      return sendPixEmail({
         to:       cliente_email,
         nome:     cliente_nome,
         pedidoId: order_id,
         total,
         itens,
         pixCode:  emv,
-      }).catch(e => console.error('Erro e-mail PIX:', e));
-    }).catch(() => {});
+      });
+    }).then(() => {
+      console.log(`📧 PIX: e-mail enviado com sucesso para ${cliente_email}`);
+    }).catch(e => console.error('❌ Erro e-mail PIX:', e.message, e.stack));
 
     return res.json({ ok:true, payment_id:order_id, status:'pending', qr_code:emv, qr_code_base64:null, total });
 
