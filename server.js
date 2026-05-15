@@ -53,6 +53,17 @@ async function runMigrations() {
         anotacao   TEXT,
         criado_em  TIMESTAMP DEFAULT NOW()
       );
+      CREATE TABLE IF NOT EXISTS payments (
+        id              SERIAL PRIMARY KEY,
+        order_id        INTEGER NOT NULL UNIQUE REFERENCES orders(id) ON DELETE CASCADE,
+        mp_payment_id   TEXT,
+        method          TEXT NOT NULL DEFAULT 'pix',
+        status          TEXT NOT NULL DEFAULT 'pending',
+        amount          NUMERIC(10,2),
+        qr_code         TEXT,
+        qr_code_base64  TEXT,
+        criado_em       TIMESTAMP DEFAULT NOW()
+      );
     `);
     // Adiciona colunas novas em tabelas existentes (idempotente)
     await client.query(`
