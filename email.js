@@ -7,7 +7,8 @@ function getResend() {
 
 // Resend exige domínio verificado para remetente customizado.
 // Use onboarding@resend.dev até verificar seu domínio no painel do Resend.
-const FROM = process.env.RESEND_FROM || 'Beaver Books <onboarding@resend.dev>';
+const FROM     = process.env.RESEND_FROM  || 'Beaver Books <onboarding@resend.dev>';
+const REPLY_TO = process.env.REPLY_TO_EMAIL || undefined;
 
 // ── Helper: formatar preço ────────────────────────────────────────────────
 function fmtBRL(value) {
@@ -116,8 +117,9 @@ async function sendPixEmail({ to, nome, pedidoId, total, itens, pixCode }) {
 
   const resend = getResend();
   const { error } = await resend.emails.send({
-    from:    FROM,
+    from:     FROM,
     to,
+    reply_to: REPLY_TO,
     subject: `✅ Pedido #${pedidoId} recebido — aguardando PIX · Beaver Books`,
     html:    baseLayout(content),
   });
@@ -148,8 +150,9 @@ async function sendCardApprovedEmail({ to, nome, pedidoId, total, itens }) {
 
   const resend = getResend();
   const { error } = await resend.emails.send({
-    from:    FROM,
+    from:     FROM,
     to,
+    reply_to: REPLY_TO,
     subject: `🎊 Pagamento confirmado — Pedido #${pedidoId} · Beaver Books`,
     html:    baseLayout(content),
   });
@@ -180,8 +183,9 @@ async function sendCardPendingEmail({ to, nome, pedidoId, total, itens }) {
 
   const resend = getResend();
   const { error } = await resend.emails.send({
-    from:    FROM,
+    from:     FROM,
     to,
+    reply_to: REPLY_TO,
     subject: `⏳ Pedido #${pedidoId} em análise · Beaver Books`,
     html:    baseLayout(content),
   });
