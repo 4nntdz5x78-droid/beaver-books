@@ -372,12 +372,12 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(28,26,23,.6);
-  z-index: 300;
+  background: rgba(28,26,23,.65);
+  z-index: 1500;           /* acima do header (z-index:1000) */
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 100px 24px 24px;
+  padding: 100px 24px 48px; /* 100px = header(74) + folga(26) */
   overflow-y: auto;
   opacity: 0;
   pointer-events: none;
@@ -391,12 +391,11 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   border-radius: 12px;
   width: 100%;
   max-width: 480px;
-  max-height: 90vh;
-  overflow-y: auto;
   padding: 32px;
   box-shadow: var(--shadow);
   transform: translateY(16px);
   transition: transform .3s;
+  /* sem max-height: o overlay scrollável cuida disso */
 }
 .modal-overlay.open .modal { transform: translateY(0); }
 
@@ -1038,6 +1037,8 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
   .book-price { font-size: 16px; }
   .modal { padding: 24px 20px; }
   .modal h2 { font-size: 20px; }
+  /* Modal responsivo em mobile */
+  .modal-overlay { padding: 88px 12px 40px; }
 }
 /* ── PIX QR Code ──────────────────────────────────────────────────── */
 @keyframes spin { to { transform: rotate(360deg); } }
