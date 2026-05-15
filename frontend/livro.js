@@ -603,131 +603,142 @@
             <p>Total: <strong>${fmtPrice(total)}</strong></p>
           </div>
         </div>
-        <form id="mp-card-form">
-          <div class="card-form-grid">
-            <div class="form-group full">
-              <label>Número do cartão</label>
-              <input id="mp-cardNumber" class="mp-input" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number"/>
-            </div>
-            <div class="form-group">
-              <label>Validade</label>
-              <input id="mp-expiration" class="mp-input" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp"/>
-            </div>
-            <div class="form-group">
-              <label>CVV</label>
-              <input id="mp-cvv" class="mp-input" type="text" inputmode="numeric" placeholder="CVV" maxlength="4" autocomplete="cc-csc"/>
-            </div>
-            <div class="form-group full">
-              <label>Nome no cartão</label>
-              <input id="mp-cardholder" class="mp-input" type="text" placeholder="Como está no cartão" autocomplete="cc-name"/>
-            </div>
-            <div class="form-group full">
-              <label>CPF do titular</label>
-              <input id="mp-cpf" class="mp-input" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"/>
-            </div>
-            <div class="form-group full" id="mp-installments-wrap" style="display:none">
-              <label>Parcelas</label>
-              <select id="mp-installments" class="mp-input"></select>
-            </div>
+        <div class="card-form-grid">
+          <div class="form-group full">
+            <label>Número do cartão</label>
+            <input id="mp-cardNumber" class="mp-input" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number"/>
           </div>
-          <div class="card-form-security">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-            Pagamento seguro via Mercado Pago
+          <div class="form-group">
+            <label>Validade</label>
+            <input id="mp-expiration" class="mp-input" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp"/>
           </div>
-          <div class="modal-actions" style="margin-top:16px">
-            <button type="button" class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
-            <button type="submit" id="mp-pay-btn" class="modal-confirm-btn">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-              Pagar ${fmtPrice(total)}
-            </button>
+          <div class="form-group">
+            <label>CVV</label>
+            <input id="mp-cvv" class="mp-input" type="text" inputmode="numeric" placeholder="CVV" maxlength="4" autocomplete="cc-csc"/>
           </div>
-        </form>
+          <div class="form-group full">
+            <label>Nome no cartão</label>
+            <input id="mp-cardholder" class="mp-input" type="text" placeholder="Como está no cartão" autocomplete="cc-name"/>
+          </div>
+          <div class="form-group full">
+            <label>CPF do titular</label>
+            <input id="mp-cpf" class="mp-input" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"/>
+          </div>
+          <div class="form-group full" id="mp-installments-wrap" style="display:none">
+            <label>Parcelas</label>
+            <select id="mp-installments" class="mp-input"></select>
+          </div>
+        </div>
+        <div class="card-form-security">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Pagamento seguro via Mercado Pago
+        </div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button type="button" class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+          <button type="button" id="mp-pay-btn" class="modal-confirm-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Pagar ${fmtPrice(total)}
+          </button>
+        </div>
       </div>`;
 
-    // Máscara: número do cartão (grupos de 4)
-    document.getElementById('mp-cardNumber').addEventListener('input', function(){
+    // Inicializar MP (sem cardForm — usamos createCardToken diretamente)
+    _mpInstance = new MercadoPago(cfg.mp_public_key, { locale:'pt-BR' });
+
+    // Máscara: número do cartão + detecção de parcelas ao digitar BIN
+    document.getElementById('mp-cardNumber').addEventListener('input', async function(){
       let v = this.value.replace(/\D/g,'').substring(0,16);
       this.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+      if(v.length >= 6) {
+        try {
+          const bin  = v.substring(0,6);
+          const inst = await _mpInstance.getInstallments({ amount:String(total), bin, locale:'pt-BR', paymentTypeId:'credit_card' });
+          const costs = inst?.[0]?.payer_costs || [];
+          const wrap = document.getElementById('mp-installments-wrap');
+          const sel  = document.getElementById('mp-installments');
+          if(costs.length && wrap && sel){
+            sel.innerHTML = costs.map(p=>`<option value="${p.installments}">${p.recommended_message}</option>`).join('');
+            wrap.style.display='';
+          }
+        } catch(e){}
+      }
     });
+
     // Máscara: validade MM/AA
     document.getElementById('mp-expiration').addEventListener('input', function(){
       let v = this.value.replace(/\D/g,'').substring(0,4);
-      if(v.length > 2) v = v.substring(0,2) + '/' + v.substring(2);
+      if(v.length > 2) v = v.substring(0,2)+'/'+v.substring(2);
       this.value = v;
     });
+
     // Máscara: CPF
-    const cpfInput = document.getElementById('mp-cpf');
-    cpfInput.addEventListener('input', () => {
-      let v = cpfInput.value.replace(/\D/g,'');
+    document.getElementById('mp-cpf').addEventListener('input', function(){
+      let v = this.value.replace(/\D/g,'');
       v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
-      cpfInput.value = v;
+      this.value = v;
     });
 
-    // Inicializar Mercado Pago SDK (iframe:false = inputs regulares, MP tokeniza client-side)
-    _mpInstance = new MercadoPago(cfg.mp_public_key, { locale:'pt-BR' });
-    _cardFormInstance = _mpInstance.cardForm({
-      amount: String(total),
-      iframe: false,
-      form: {
-        id: 'mp-card-form',
-        cardNumber:     { id:'mp-cardNumber', placeholder:'0000 0000 0000 0000' },
-        expirationDate: { id:'mp-expiration', placeholder:'MM/AA' },
-        securityCode:   { id:'mp-cvv',        placeholder:'CVV' },
-        cardholderName: { id:'mp-cardholder', placeholder:'Nome no cartão' },
-        installments:   { id:'mp-installments' },
-      },
-      callbacks: {
-        onFormMounted: err => { if(err) console.warn('MP CardForm mount error:', err); },
-        onInstallmentsReceived: (_err, data) => {
-          const wrap = document.getElementById('mp-installments-wrap');
-          const sel  = document.getElementById('mp-installments');
-          if(!data?.payer_costs?.length) return;
-          sel.innerHTML = data.payer_costs.map(p =>
-            `<option value="${p.installments}">${p.recommended_message}</option>`
-          ).join('');
-          if(wrap) wrap.style.display = '';
-        },
-        onSubmit: async (event) => {
-          event.preventDefault();
-          const payBtn = document.getElementById('mp-pay-btn');
-          if(payBtn){ payBtn.disabled=true; payBtn.textContent='Processando…'; }
+    // Botão Pagar — tokeniza e envia
+    document.getElementById('mp-pay-btn').addEventListener('click', async function(){
+      const cardNum  = document.getElementById('mp-cardNumber').value.replace(/\D/g,'');
+      const cardName = document.getElementById('mp-cardholder').value.trim();
+      const expiry   = document.getElementById('mp-expiration').value.trim();
+      const cvv      = document.getElementById('mp-cvv').value.trim();
+      const cpf      = document.getElementById('mp-cpf').value.replace(/\D/g,'');
+      const parcelas = parseInt(document.getElementById('mp-installments')?.value) || 1;
 
-          try {
-            const formData = _cardFormInstance.getCardFormData();
-            const cpf = document.getElementById('mp-cpf')?.value.replace(/\D/g,'') || '';
+      if(!cardNum||cardNum.length<15||!cardName||!expiry.includes('/')||!cvv){
+        toast('Preencha todos os campos do cartão.','error'); return;
+      }
+      const [expM, expY] = expiry.split('/');
 
-            const cardRes = await fetch(`${API}/payments/card`, {
-              method:'POST',
-              headers:{'Content-Type':'application/json'},
-              body: JSON.stringify({
-                order_id:          pedidoId,
-                token:             formData.token,
-                installments:      formData.installments,
-                payment_method_id: formData.paymentMethodId,
-                issuer_id:         formData.issuerId,
-                payer: {
-                  email: email,
-                  identification: { type:'CPF', number: cpf },
-                },
-              }),
-            });
-            const cardData = await cardRes.json();
+      this.disabled=true; this.textContent='Processando…';
 
-            if(cardData.approved) {
-              showCardSuccess(pedidoId, nome, total);
-            } else if(cardData.in_process) {
-              showCardPending(pedidoId, nome);
-            } else {
-              toast('Cartão recusado. Tente outro cartão ou use PIX.', 'error');
-              if(payBtn){ payBtn.disabled=false; payBtn.textContent=`Pagar ${fmtPrice(total)}`; }
-            }
-          } catch(err) {
-            toast(err.message || 'Erro ao processar cartão.', 'error');
-            const payBtn = document.getElementById('mp-pay-btn');
-            if(payBtn){ payBtn.disabled=false; payBtn.textContent=`Pagar ${fmtPrice(total)}`; }
-          }
-        },
-      },
+      try {
+        // 1. Detectar bandeira pelo BIN
+        const bin    = cardNum.substring(0,6);
+        const pmList = await _mpInstance.getPaymentMethods({ bin });
+        const pm     = pmList.results?.[0] || {};
+
+        // 2. Tokenizar cartão
+        const tokenRes = await _mpInstance.createCardToken({
+          cardNumber:           cardNum,
+          cardholderName:       cardName,
+          cardExpirationMonth:  expM,
+          cardExpirationYear:   expY.length===2 ? '20'+expY : expY,
+          securityCode:         cvv,
+          identificationType:   'CPF',
+          identificationNumber: cpf,
+        });
+
+        if(!tokenRes?.id) throw new Error(tokenRes?.cause?.[0]?.description || 'Falha ao gerar token do cartão.');
+
+        // 3. Cobrar via backend
+        const cardRes = await fetch(`${API}/payments/card`,{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            order_id:          pedidoId,
+            token:             tokenRes.id,
+            installments:      parcelas,
+            payment_method_id: pm.id || '',
+            issuer_id:         pm.issuer?.id,
+            payer:{ email, identification:{ type:'CPF', number:cpf } },
+          }),
+        });
+        const cardData = await cardRes.json();
+
+        if(cardData.approved)       showCardSuccess(pedidoId, nome, total);
+        else if(cardData.in_process) showCardPending(pedidoId, nome);
+        else {
+          toast(cardData.erro || 'Cartão recusado. Tente outro ou use PIX.','error');
+          this.disabled=false;
+          this.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pagar '+fmtPrice(total);
+        }
+      } catch(err){
+        toast(err.message||'Erro ao processar cartão.','error');
+        this.disabled=false;
+        this.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Pagar '+fmtPrice(total);
+      }
     });
   }
 
