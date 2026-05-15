@@ -462,13 +462,12 @@ async function showCardFormCat(pedidoId, total, nome, email) {
     iframe: true,
     form: {
       id: 'mp-card-form-cat',
-      cardNumber:          { id:'mp-cardNumber-cat',   placeholder:'0000 0000 0000 0000' },
-      expirationDate:      { id:'mp-expiration-cat',   placeholder:'MM/AA' },
-      securityCode:        { id:'mp-cvv-cat',          placeholder:'CVV' },
-      cardholderName:      { id:'mp-cardholder-cat',   placeholder:'Nome no cartão' },
-      installments:        { id:'mp-installments-cat' },
-      identificationType:  { id:'mp-id-type-cat',     placeholder:'CPF' },
-      identificationNumber:{ id:'mp-cpf-cat',         placeholder:'000.000.000-00' },
+      cardNumber:     { id:'mp-cardNumber-cat',   placeholder:'0000 0000 0000 0000' },
+      expirationDate: { id:'mp-expiration-cat',   placeholder:'MM/AA' },
+      securityCode:   { id:'mp-cvv-cat',          placeholder:'CVV' },
+      cardholderName: { id:'mp-cardholder-cat',   placeholder:'Nome no cartão' },
+      installments:   { id:'mp-installments-cat' },
+      // CPF lido manualmente via #mp-cpf-cat, sem envolver o SDK
     },
     callbacks: {
       onFormMounted: err => { if(err) console.warn('MP CardForm error:', err); },

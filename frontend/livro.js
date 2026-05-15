@@ -659,19 +659,16 @@
       iframe: true,
       form: {
         id: 'mp-card-form',
-        cardNumber:         { id:'mp-cardNumber',  placeholder:'0000 0000 0000 0000' },
-        expirationDate:     { id:'mp-expiration',  placeholder:'MM/AA' },
-        securityCode:       { id:'mp-cvv',         placeholder:'CVV' },
-        cardholderName:     { id:'mp-cardholder',  placeholder:'Nome no cartão' },
-        installments:       { id:'mp-installments' },
-        identificationType: { id:'mp-id-type', placeholder:'CPF' },
-        identificationNumber:{ id:'mp-cpf',    placeholder:'000.000.000-00' },
+        // Apenas os campos que o MP gerencia como iframes + nome/parcelas
+        cardNumber:     { id:'mp-cardNumber', placeholder:'0000 0000 0000 0000' },
+        expirationDate: { id:'mp-expiration', placeholder:'MM/AA' },
+        securityCode:   { id:'mp-cvv',        placeholder:'CVV' },
+        cardholderName: { id:'mp-cardholder', placeholder:'Nome no cartão' },
+        installments:   { id:'mp-installments' },
+        // CPF é lido manualmente via #mp-cpf, sem envolver o SDK
       },
       callbacks: {
         onFormMounted: err => { if(err) console.warn('MP CardForm mount error:', err); },
-        onIdentificationTypesReceived: (_err, types) => {
-          // Já preenchemos CPF direto, sem necessidade de selector
-        },
         onInstallmentsReceived: (_err, data) => {
           const wrap = document.getElementById('mp-installments-wrap');
           const sel  = document.getElementById('mp-installments');
@@ -681,7 +678,6 @@
           ).join('');
           if(wrap) wrap.style.display = '';
         },
-        onCardTokenReceived: (_err, _token) => {},
         onSubmit: async (event) => {
           event.preventDefault();
           const payBtn = document.getElementById('mp-pay-btn');

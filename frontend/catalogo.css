@@ -390,6 +390,8 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   border-radius: 12px;
   width: 100%;
   max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 32px;
   box-shadow: var(--shadow);
   transform: translateY(16px);
@@ -1132,23 +1134,27 @@ select.filter-select:hover, select.filter-select:focus { border-color: var(--bor
 .mp-field iframe { width: 100% !important; height: 26px !important; border: none !important; }
 .mp-field:focus-within { border-color: var(--red); }
 
-/* Inputs normais (nome, CPF, parcelas) */
-.mp-input {
+/* Inputs normais (nome, CPF, parcelas) — seletor específico para sobrescrever .form-group input */
+.card-form-wrap .mp-input,
+.card-form-wrap input.mp-input,
+.card-form-wrap select.mp-input {
   width: 100%;
-  border: 1.5px solid var(--border);
+  border: 1.5px solid var(--border) !important;
   border-radius: 8px;
   padding: 10px 12px;
-  background: #fff;
+  background: #ffffff !important;
   color: var(--ink);
   font-size: 14px;
   font-family: var(--ff-ui);
   transition: border-color .2s;
   box-sizing: border-box;
   -webkit-appearance: none;
+  outline: none;
 }
-.mp-input:focus { outline: none; border-color: var(--red); }
-.mp-input::placeholder { color: #b0a49a; }
-.mp-input option { background: #fff; color: var(--ink); }
+.card-form-wrap .mp-input:focus,
+.card-form-wrap input.mp-input:focus { border-color: var(--red) !important; }
+.card-form-wrap .mp-input::placeholder { color: #b0a49a; }
+.card-form-wrap .mp-input option { background: #fff; color: var(--ink); }
 
 .card-form-security {
   display: flex;
