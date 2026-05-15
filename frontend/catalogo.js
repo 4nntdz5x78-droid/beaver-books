@@ -425,11 +425,11 @@ async function showCardFormCat(pedidoId, total, nome, email) {
       </div>
       <form id="mp-card-form-cat">
         <div class="card-form-grid">
-          <div class="form-group full"><label>Número do cartão</label><div id="mp-cardNumber-cat" class="mp-field"></div></div>
-          <div class="form-group"><label>Validade</label><div id="mp-expiration-cat" class="mp-field"></div></div>
-          <div class="form-group"><label>CVV</label><div id="mp-cvv-cat" class="mp-field"></div></div>
+          <div class="form-group full"><label>Número do cartão</label><input id="mp-cardNumber-cat" class="mp-input" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number"/></div>
+          <div class="form-group"><label>Validade</label><input id="mp-expiration-cat" class="mp-input" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp"/></div>
+          <div class="form-group"><label>CVV</label><input id="mp-cvv-cat" class="mp-input" type="text" inputmode="numeric" placeholder="CVV" maxlength="4" autocomplete="cc-csc"/></div>
           <div class="form-group full"><label>Nome no cartão</label><input id="mp-cardholder-cat" class="mp-input" type="text" placeholder="Como está no cartão" autocomplete="cc-name"/></div>
-          <div class="form-group full"><label>CPF do titular</label><input id="mp-cpf-cat" class="mp-input" type="text" placeholder="000.000.000-00" maxlength="14"/></div>
+          <div class="form-group full"><label>CPF do titular</label><input id="mp-cpf-cat" class="mp-input" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"/></div>
           <div class="form-group full" id="mp-installments-wrap-cat" style="display:none">
             <label>Parcelas</label>
             <select id="mp-installments-cat" class="mp-input"></select>
@@ -449,6 +449,16 @@ async function showCardFormCat(pedidoId, total, nome, email) {
       </form>
     </div>`;
 
+  // Máscaras dos inputs
+  document.getElementById('mp-cardNumber-cat').addEventListener('input', function(){
+    let v = this.value.replace(/\D/g,'').substring(0,16);
+    this.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+  });
+  document.getElementById('mp-expiration-cat').addEventListener('input', function(){
+    let v = this.value.replace(/\D/g,'').substring(0,4);
+    if(v.length > 2) v = v.substring(0,2) + '/' + v.substring(2);
+    this.value = v;
+  });
   const cpfInput = document.getElementById('mp-cpf-cat');
   cpfInput.addEventListener('input', () => {
     let v = cpfInput.value.replace(/\D/g,'');
@@ -459,7 +469,7 @@ async function showCardFormCat(pedidoId, total, nome, email) {
   _mpInstanceCat = new MercadoPago(cfg.mp_public_key, { locale:'pt-BR' });
   _cardFormInstanceCat = _mpInstanceCat.cardForm({
     amount: String(total),
-    iframe: true,
+    iframe: false,
     form: {
       id: 'mp-card-form-cat',
       cardNumber:     { id:'mp-cardNumber-cat',   placeholder:'0000 0000 0000 0000' },
@@ -467,7 +477,6 @@ async function showCardFormCat(pedidoId, total, nome, email) {
       securityCode:   { id:'mp-cvv-cat',          placeholder:'CVV' },
       cardholderName: { id:'mp-cardholder-cat',   placeholder:'Nome no cartão' },
       installments:   { id:'mp-installments-cat' },
-      // CPF lido manualmente via #mp-cpf-cat, sem envolver o SDK
     },
     callbacks: {
       onFormMounted: err => { if(err) console.warn('MP CardForm error:', err); },

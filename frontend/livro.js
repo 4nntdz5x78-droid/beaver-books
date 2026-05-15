@@ -607,15 +607,15 @@
           <div class="card-form-grid">
             <div class="form-group full">
               <label>Número do cartão</label>
-              <div id="mp-cardNumber" class="mp-field"></div>
+              <input id="mp-cardNumber" class="mp-input" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="19" autocomplete="cc-number"/>
             </div>
             <div class="form-group">
               <label>Validade</label>
-              <div id="mp-expiration" class="mp-field"></div>
+              <input id="mp-expiration" class="mp-input" type="text" inputmode="numeric" placeholder="MM/AA" maxlength="5" autocomplete="cc-exp"/>
             </div>
             <div class="form-group">
               <label>CVV</label>
-              <div id="mp-cvv" class="mp-field"></div>
+              <input id="mp-cvv" class="mp-input" type="text" inputmode="numeric" placeholder="CVV" maxlength="4" autocomplete="cc-csc"/>
             </div>
             <div class="form-group full">
               <label>Nome no cartão</label>
@@ -623,7 +623,7 @@
             </div>
             <div class="form-group full">
               <label>CPF do titular</label>
-              <input id="mp-cpf" class="mp-input" type="text" placeholder="000.000.000-00" maxlength="14"/>
+              <input id="mp-cpf" class="mp-input" type="text" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"/>
             </div>
             <div class="form-group full" id="mp-installments-wrap" style="display:none">
               <label>Parcelas</label>
@@ -644,7 +644,18 @@
         </form>
       </div>`;
 
-    // Formatar CPF enquanto digita
+    // Máscara: número do cartão (grupos de 4)
+    document.getElementById('mp-cardNumber').addEventListener('input', function(){
+      let v = this.value.replace(/\D/g,'').substring(0,16);
+      this.value = v.replace(/(\d{4})(?=\d)/g,'$1 ');
+    });
+    // Máscara: validade MM/AA
+    document.getElementById('mp-expiration').addEventListener('input', function(){
+      let v = this.value.replace(/\D/g,'').substring(0,4);
+      if(v.length > 2) v = v.substring(0,2) + '/' + v.substring(2);
+      this.value = v;
+    });
+    // Máscara: CPF
     const cpfInput = document.getElementById('mp-cpf');
     cpfInput.addEventListener('input', () => {
       let v = cpfInput.value.replace(/\D/g,'');
@@ -652,20 +663,18 @@
       cpfInput.value = v;
     });
 
-    // Inicializar Mercado Pago SDK
+    // Inicializar Mercado Pago SDK (iframe:false = inputs regulares, MP tokeniza client-side)
     _mpInstance = new MercadoPago(cfg.mp_public_key, { locale:'pt-BR' });
     _cardFormInstance = _mpInstance.cardForm({
       amount: String(total),
-      iframe: true,
+      iframe: false,
       form: {
         id: 'mp-card-form',
-        // Apenas os campos que o MP gerencia como iframes + nome/parcelas
         cardNumber:     { id:'mp-cardNumber', placeholder:'0000 0000 0000 0000' },
         expirationDate: { id:'mp-expiration', placeholder:'MM/AA' },
         securityCode:   { id:'mp-cvv',        placeholder:'CVV' },
         cardholderName: { id:'mp-cardholder', placeholder:'Nome no cartão' },
         installments:   { id:'mp-installments' },
-        // CPF é lido manualmente via #mp-cpf, sem envolver o SDK
       },
       callbacks: {
         onFormMounted: err => { if(err) console.warn('MP CardForm mount error:', err); },
