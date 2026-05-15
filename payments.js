@@ -160,15 +160,16 @@ router.post('/card', async (req, res) => {
     // Disparar e-mail em background
     const emailNome = pedido.rows[0].cliente_nome;
     const emailTo   = payer.email || pedido.rows[0].cliente_email;
+    console.log(`📧 Tentando enviar e-mail para ${emailTo} — status: ${status}`);
     getOrderItens(order_id).then(itens => {
       if (status === 'approved') {
-        sendCardApprovedEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens })
-          .catch(e => console.error('Erro e-mail aprovado:', e));
+        return sendCardApprovedEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens });
       } else if (status === 'in_process') {
-        sendCardPendingEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens })
-          .catch(e => console.error('Erro e-mail pendente:', e));
+        return sendCardPendingEmail({ to: emailTo, nome: emailNome, pedidoId: order_id, total, itens });
       }
-    }).catch(() => {});
+    }).then(() => {
+      console.log(`📧 E-mail enviado com sucesso para ${emailTo}`);
+    }).catch(e => console.error('❌ Erro ao enviar e-mail:', e.message, e.stack));
 
     return res.json({
       ok:           status !== 'rejected',
@@ -184,6 +185,30 @@ router.post('/card', async (req, res) => {
   } catch (err) {
     console.error('Erro cartão:', err);
     return res.status(500).json({ ok:false, erro:'Erro interno ao processar pagamento.' });
+  }
+});
+
+// ── GET /payments/test-email — testa conexão SMTP ────────────────────────
+router.get('/test-email', async (req, res) => {
+  const nodemailer = require('nodemailer');
+  try {
+    const transporter = nodemailer.createTransport({
+      host:   process.env.SMTP_HOST || 'smtp.gmail.com',
+      port:   parseInt(process.env.SMTP_PORT || '587'),
+      secure: false,
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+    });
+    await transporter.verify();
+    await transporter.sendMail({
+      from:    process.env.EMAIL_FROM || process.env.SMTP_USER,
+      to:      process.env.SMTP_USER,
+      subject: '✅ Teste de e-mail — Beaver Books',
+      html:    '<p>Conexão SMTP funcionando corretamente!</p>',
+    });
+    return res.json({ ok:true, mensagem:`E-mail de teste enviado para ${process.env.SMTP_USER}` });
+  } catch(e) {
+    console.error('Erro SMTP:', e);
+    return res.status(500).json({ ok:false, erro: e.message });
   }
 });
 
