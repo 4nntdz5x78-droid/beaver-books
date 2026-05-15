@@ -1363,3 +1363,80 @@ footer {
   .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
   .modal { padding: 24px 20px; }
 }
+
+/* ── Payment Method Selector ──────────────────────────────── */
+.payment-method-selector {
+  display: flex;
+  gap: 10px;
+  margin: 18px 0 4px;
+}
+.pm-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: border-color .2s, color .2s, background .2s;
+  user-select: none;
+}
+.pm-option.active {
+  border-color: var(--red);
+  color: var(--red);
+  background: rgba(192,20,60,.06);
+}
+.pm-option .pm-icon { display: flex; }
+
+/* ── Card Form ───────────────────────────────────────────── */
+.card-form-wrap { display: flex; flex-direction: column; gap: 18px; }
+.card-form-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.card-form-header h3 { margin: 0 0 2px; font-size: 16px; }
+.card-form-header p  { margin: 0; font-size: 13px; color: var(--text-dim); }
+.card-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.card-form-grid .form-group.full { grid-column: 1 / -1; }
+.mp-field {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--card-bg);
+  min-height: 42px;
+  transition: border-color .2s;
+}
+.mp-field:focus-within { border-color: var(--red); }
+.mp-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: var(--card-bg);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color .2s;
+  box-sizing: border-box;
+}
+.mp-input:focus { outline: none; border-color: var(--red); }
+.mp-input option { background: var(--card-bg); }
+.card-form-security {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-dim);
+}

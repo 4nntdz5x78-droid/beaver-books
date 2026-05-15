@@ -284,12 +284,103 @@ function goToPage(p) {
 }
 
 /* ── Checkout ─────────────────────────────────────────────────────────────── */
+let _mpInstanceCat = null;
+let _cardFormInstanceCat = null;
+
 function openCheckout() {
   closeCart();
   if (!modalContent) return;
-  modalContent.innerHTML = buildCheckoutForm();
+
+  const summaryLines = cart.map(item =>
+    `<div class="order-summary-line"><span>${escHtml(item.titulo)} × ${item.quantidade}</span><span>${formatPrice(item.preco*item.quantidade)}</span></div>`
+  ).join('');
+  const total = cartTotal();
+
+  modalContent.innerHTML = `
+    <h2>Finalizar pedido</h2>
+    <p class="modal-subtitle">Preencha seus dados para confirmar a compra.</p>
+    <div class="order-summary">
+      ${summaryLines}
+      <div class="order-summary-line total"><span>Total</span><span>${formatPrice(total)}</span></div>
+    </div>
+    <form id="checkout-form" novalidate>
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input type="text" id="checkout-nome" placeholder="Seu nome" required>
+      </div>
+      <div class="form-group">
+        <label>E-mail *</label>
+        <input type="email" id="checkout-email" placeholder="seu@email.com" required>
+      </div>
+
+      <!-- Seletor de método de pagamento -->
+      <div class="payment-method-selector">
+        <label class="pm-option active" id="pm-pix-label">
+          <input type="radio" name="payment_method" value="pix" checked hidden>
+          <span class="pm-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          </span>
+          <span>PIX</span>
+        </label>
+        <label class="pm-option" id="pm-card-label">
+          <input type="radio" name="payment_method" value="card" hidden>
+          <span class="pm-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </span>
+          <span>Cartão de Crédito</span>
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+        <button type="submit" class="modal-confirm-btn" id="confirm-btn">Continuar</button>
+      </div>
+    </form>`;
+
   if (modalOverlay) modalOverlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+
+  document.querySelectorAll('.pm-option').forEach(label => {
+    label.addEventListener('click', () => {
+      document.querySelectorAll('.pm-option').forEach(l => l.classList.remove('active'));
+      label.classList.add('active');
+    });
+  });
+
+  document.getElementById('checkout-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const nome  = document.getElementById('checkout-nome').value.trim();
+    const email = document.getElementById('checkout-email').value.trim();
+    if (!nome || !email || !email.includes('@')) { toast('Preencha todos os campos.', 'error'); return; }
+
+    const method = document.querySelector('input[name="payment_method"]:checked')?.value || 'pix';
+    const btn    = document.getElementById('confirm-btn');
+    if (btn) { btn.disabled=true; btn.textContent='Processando…'; }
+
+    const itens = cart.map(item => ({ livro_id:item.id, quantidade:item.quantidade }));
+
+    try {
+      const res  = await fetch('/orders', { method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ cliente_nome:nome, cliente_email:email, itens }) });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.erro || 'Erro ao processar pedido.');
+
+      if (method === 'pix') {
+        const pixRes  = await fetch('/payments/pix', { method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ order_id:data.pedido_id, cliente_nome:nome, cliente_email:email }) });
+        const pixData = await pixRes.json();
+        cart=[]; saveCart(); updateCartUI(); fetchBooks();
+        if (pixRes.ok && pixData.ok) showPixQRCode(data.pedido_id, pixData);
+        else showOrderSuccess(data.pedido_id);
+      } else {
+        cart=[]; saveCart(); updateCartUI(); fetchBooks();
+        await showCardFormCat(data.pedido_id, total, nome, email);
+      }
+    } catch (err) {
+      toast(err.message, 'error');
+      if (btn) { btn.disabled=false; btn.textContent='Continuar'; }
+    }
+  });
 }
 
 function closeModal() {
@@ -297,105 +388,153 @@ function closeModal() {
   document.body.style.overflow = '';
 }
 
-function buildCheckoutForm() {
-  const summaryLines = cart.map(item =>
-    `<div class="order-summary-line">
-       <span>${escHtml(item.titulo)} × ${item.quantidade}</span>
-       <span>${formatPrice(item.preco * item.quantidade)}</span>
-     </div>`
-  ).join('');
-
-  return `
-    <h2>Finalizar pedido</h2>
-    <p class="modal-subtitle">Preencha seus dados para confirmar a compra.</p>
-    <div class="order-summary">
-      ${summaryLines}
-      <div class="order-summary-line total">
-        <span>Total</span>
-        <span>${formatPrice(cartTotal())}</span>
-      </div>
-    </div>
-    <form id="checkout-form" novalidate>
-      <div class="form-group">
-        <label for="checkout-nome">Nome completo *</label>
-        <input type="text" id="checkout-nome" placeholder="Seu nome" required>
-      </div>
-      <div class="form-group">
-        <label for="checkout-email">E-mail *</label>
-        <input type="email" id="checkout-email" placeholder="seu@email.com" required>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
-        <button type="submit" class="modal-confirm-btn" id="confirm-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-          Confirmar pedido
-        </button>
-      </div>
-    </form>`;
-}
-
 function showOrderSuccess(pedidoId) {
   if (!modalContent) return;
   modalContent.innerHTML = `
     <div class="success-state">
       <div class="success-icon">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="20 6 9 17 4 12"/>
-        </svg>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
       <h3>Pedido confirmado!</h3>
       <p>Seu pedido foi registrado com sucesso.</p>
-      <p>Nº do pedido: <strong>#${pedidoId}</strong></p>
-      <button class="checkout-btn" style="max-width:200px;margin:0 auto" onclick="closeModal()">
-        Continuar comprando
-      </button>
+      <p style="font-size:13px;color:var(--text-dim);margin:16px 0">Nº do pedido: <strong>#${pedidoId}</strong></p>
+      <button class="checkout-btn" style="max-width:200px;margin:0 auto" onclick="closeModal()">Continuar comprando</button>
     </div>`;
 }
 
-async function submitOrder(nome, email) {
-  const confirmBtn = document.getElementById('confirm-btn');
-  if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Processando...'; }
+async function showCardFormCat(pedidoId, total, nome, email) {
+  if (!modalContent) return;
 
-  const itens = cart.map(item => ({ livro_id: item.id, quantidade: item.quantidade }));
-
-  try {
-    // 1. Criar pedido
-    const res  = await fetch('/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cliente_nome: nome, cliente_email: email, itens }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.ok) throw new Error(data.erro || 'Erro ao processar pedido.');
-
-    // 2. Gerar PIX
-    const pixRes = await fetch('/payments/pix', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order_id: data.pedido_id, cliente_nome: nome, cliente_email: email }),
-    });
-    const pixData = await pixRes.json();
-
-    cart = [];
-    saveCart();
-    updateCartUI();
-
-    if (pixRes.ok && pixData.ok) {
-      showPixQRCode(data.pedido_id, pixData);
-    } else {
-      showOrderSuccess(data.pedido_id);
-    }
-    fetchBooks();
-
-  } catch (err) {
-    toast(err.message, 'error');
-    if (confirmBtn) {
-      confirmBtn.disabled = false;
-      confirmBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Confirmar pedido';
-    }
+  const cfg = await fetch('/payments/config').then(r=>r.json()).catch(()=>({}));
+  if (!cfg.mp_public_key) {
+    modalContent.innerHTML = `<div class="success-state">
+      <h3>Cartão indisponível</h3>
+      <p style="color:var(--text-dim);margin:16px 0">Por favor, use PIX como forma de pagamento.</p>
+      <button class="checkout-btn" style="max-width:200px;margin:0 auto" onclick="closeModal()">Fechar</button>
+    </div>`;
+    return;
   }
+
+  modalContent.innerHTML = `
+    <div class="card-form-wrap">
+      <div class="card-form-header">
+        <div class="pix-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div><h3>Pedido #${pedidoId}</h3><p>Total: <strong>${formatPrice(total)}</strong></p></div>
+      </div>
+      <form id="mp-card-form-cat">
+        <div class="card-form-grid">
+          <div class="form-group full"><label>Número do cartão</label><div id="mp-cardNumber-cat" class="mp-field"></div></div>
+          <div class="form-group"><label>Validade</label><div id="mp-expiration-cat" class="mp-field"></div></div>
+          <div class="form-group"><label>CVV</label><div id="mp-cvv-cat" class="mp-field"></div></div>
+          <div class="form-group full"><label>Nome no cartão</label><input id="mp-cardholder-cat" class="mp-input" type="text" placeholder="Como está no cartão" autocomplete="cc-name"/></div>
+          <div class="form-group full"><label>CPF do titular</label><input id="mp-cpf-cat" class="mp-input" type="text" placeholder="000.000.000-00" maxlength="14"/></div>
+          <div class="form-group full" id="mp-installments-wrap-cat" style="display:none">
+            <label>Parcelas</label>
+            <select id="mp-installments-cat" class="mp-input"></select>
+          </div>
+        </div>
+        <div class="card-form-security">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          Pagamento seguro via Mercado Pago
+        </div>
+        <div class="modal-actions" style="margin-top:16px">
+          <button type="button" class="modal-cancel-btn" onclick="closeModal()">Cancelar</button>
+          <button type="submit" id="mp-pay-btn-cat" class="modal-confirm-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            Pagar ${formatPrice(total)}
+          </button>
+        </div>
+      </form>
+    </div>`;
+
+  const cpfInput = document.getElementById('mp-cpf-cat');
+  cpfInput.addEventListener('input', () => {
+    let v = cpfInput.value.replace(/\D/g,'');
+    v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+    cpfInput.value = v;
+  });
+
+  _mpInstanceCat = new MercadoPago(cfg.mp_public_key, { locale:'pt-BR' });
+  _cardFormInstanceCat = _mpInstanceCat.cardForm({
+    amount: String(total),
+    iframe: true,
+    form: {
+      id: 'mp-card-form-cat',
+      cardNumber:          { id:'mp-cardNumber-cat',   placeholder:'0000 0000 0000 0000' },
+      expirationDate:      { id:'mp-expiration-cat',   placeholder:'MM/AA' },
+      securityCode:        { id:'mp-cvv-cat',          placeholder:'CVV' },
+      cardholderName:      { id:'mp-cardholder-cat',   placeholder:'Nome no cartão' },
+      installments:        { id:'mp-installments-cat' },
+      identificationType:  { id:'mp-id-type-cat',     placeholder:'CPF' },
+      identificationNumber:{ id:'mp-cpf-cat',         placeholder:'000.000.000-00' },
+    },
+    callbacks: {
+      onFormMounted: err => { if(err) console.warn('MP CardForm error:', err); },
+      onInstallmentsReceived: (_err, data) => {
+        const wrap = document.getElementById('mp-installments-wrap-cat');
+        const sel  = document.getElementById('mp-installments-cat');
+        if (!data?.payer_costs?.length) return;
+        sel.innerHTML = data.payer_costs.map(p =>
+          `<option value="${p.installments}">${p.recommended_message}</option>`
+        ).join('');
+        if (wrap) wrap.style.display = '';
+      },
+      onSubmit: async (event) => {
+        event.preventDefault();
+        const payBtn = document.getElementById('mp-pay-btn-cat');
+        if (payBtn) { payBtn.disabled=true; payBtn.textContent='Processando…'; }
+
+        try {
+          const formData = _cardFormInstanceCat.getCardFormData();
+          const cpf = document.getElementById('mp-cpf-cat')?.value.replace(/\D/g,'') || '';
+
+          const cardRes = await fetch('/payments/card', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+              order_id:          pedidoId,
+              token:             formData.token,
+              installments:      formData.installments,
+              payment_method_id: formData.paymentMethodId,
+              issuer_id:         formData.issuerId,
+              payer: { email, identification:{ type:'CPF', number:cpf } },
+            }),
+          });
+          const cardData = await cardRes.json();
+
+          if (cardData.approved) {
+            modalContent.innerHTML = `<div class="success-state">
+              <div class="success-icon" style="background:rgba(34,197,94,.12)">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <h3>Pagamento aprovado!</h3>
+              <p>Obrigado, ${escHtml(nome)}! Pedido confirmado.</p>
+              <p style="font-size:13px;color:var(--text-dim);margin:16px 0">Nº do pedido: <strong>#${pedidoId}</strong> · ${formatPrice(total)}</p>
+              <button class="checkout-btn" style="max-width:200px;margin:0 auto" onclick="closeModal()">Continuar comprando</button>
+            </div>`;
+          } else if (cardData.in_process) {
+            modalContent.innerHTML = `<div class="success-state">
+              <div class="success-icon" style="background:rgba(234,179,8,.12)">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#eab308" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <h3>Pagamento em análise</h3>
+              <p>Nº do pedido: <strong>#${pedidoId}</strong></p>
+              <button class="checkout-btn" style="max-width:200px;margin:0 auto" onclick="closeModal()">Fechar</button>
+            </div>`;
+          } else {
+            toast('Cartão recusado. Tente outro cartão ou use PIX.', 'error');
+            if (payBtn) { payBtn.disabled=false; payBtn.textContent=`Pagar ${formatPrice(total)}`; }
+          }
+        } catch(err) {
+          toast(err.message || 'Erro ao processar cartão.', 'error');
+          const payBtn = document.getElementById('mp-pay-btn-cat');
+          if (payBtn) { payBtn.disabled=false; payBtn.textContent=`Pagar ${formatPrice(total)}`; }
+        }
+      },
+    },
+  });
 }
 
 
