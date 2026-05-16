@@ -1131,7 +1131,9 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     background: var(--body-bg);
     border-top: 1px solid #ede8e2;
     border-bottom: 1px solid #ede8e2;
+    padding: 0;
   }
+  #servicos { padding-top: 3rem; }
   .benefits-inner {
     max-width: 1280px;
     margin: 0 auto;
