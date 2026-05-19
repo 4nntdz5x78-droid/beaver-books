@@ -2239,6 +2239,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
   }
 
   @media (max-width: 768px) {
+    section { padding: 3rem 1.25rem; }
     nav { display: none; }
     nav.open {
       display: flex;
