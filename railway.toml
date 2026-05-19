@@ -2,4 +2,4 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "npx serve frontend -p $PORT"
+startCommand = "node server.js"
