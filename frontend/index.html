@@ -63,7 +63,7 @@
 </header>
 
 <!-- CARROSEL DE BANNERS -->
-<section id="inicio" style="width:100%;padding:0;margin:0;background:transparent;">
+<section id="inicio" style="width:100%;max-width:100vw;padding:0;margin:0;background:transparent;overflow:hidden;">
   <div class="bb-carousel" id="bbCarousel">
     <div class="bb-carousel-track" id="bbTrack">
       <div class="bb-slide">
@@ -103,6 +103,11 @@
     }
     .bb-slide {
       min-width: 100%;
+      overflow: hidden;
+    }
+    .bb-slide a {
+      display: block;
+      width: 100%;
     }
     .bb-slide img {
       width: 100%;
@@ -146,7 +151,19 @@
       transition: background 0.2s;
     }
     .bb-dot.active { background: #fff; }
+    @media (max-width: 768px) {
+      .bb-slide img {
+        height: 260px;
+        object-fit: cover;
+        object-position: left center;
+      }
+    }
     @media (max-width: 600px) {
+      .bb-slide img {
+        height: 200px;
+        object-fit: cover;
+        object-position: left center;
+      }
       .bb-arrow { width: 34px; height: 34px; font-size: 22px; }
     }
   </style>

@@ -29,8 +29,8 @@
   --red-hover:    #e8183f;
   --shadow:       0 2px 8px rgba(28,26,23,.08);
 }
-html{scroll-behavior:smooth}
-body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px}
+html{scroll-behavior:smooth;overflow-x:hidden;width:100%;max-width:100vw}
+body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-height:1.6;font-size:16px;overflow-x:hidden;width:100%;max-width:100vw}
 
   /* ── Announcement Bar ─────────────────────────────────────────── */
 .announce-bar {
