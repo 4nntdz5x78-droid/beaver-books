@@ -89,6 +89,7 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     z-index: 1000;
     margin-top: 0;
     border-bottom: 1px solid rgba(192,20,60,0.3);
+    isolation: isolate;
   }
 
   .header-inner {
@@ -168,15 +169,23 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     display: none;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     gap: 5px;
     cursor: pointer;
-    padding: 8px;
+    padding: 10px 12px;
+    min-width: 44px;
+    min-height: 44px;
     background: none;
     border: none;
     border-radius: 6px;
     transition: background 0.2s;
+    position: relative;
+    z-index: 1001;
+    -webkit-tap-highlight-color: rgba(192,20,60,0.15);
+    touch-action: manipulation;
   }
-  .hamburger:hover { background: rgba(255,255,255,0.08); }
+  .hamburger:hover,
+  .hamburger:active { background: rgba(255,255,255,0.08); }
 
   .hamburger span {
     display: block;
@@ -184,8 +193,9 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     height: 2px;
     background: var(--white);
     border-radius: 2px;
-    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.3s ease;
     transform-origin: center;
+    pointer-events: none;
   }
 
   /* Animação X quando aberto */
@@ -2273,6 +2283,10 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
     section { padding: 3rem 1.25rem; }
     .nav-overlay.active { display: block; }
     .hamburger { display: flex; }
+
+    /* Header com menos padding lateral no mobile */
+    .header-inner { padding: 0 1rem; }
+    .header-actions { gap: 0; }
 
     /* Esconde links do nav por padrão no mobile */
     nav { display: none; }
