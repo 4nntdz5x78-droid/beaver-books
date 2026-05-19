@@ -157,22 +157,53 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
 .cta::after{content:'→';margin-left:.5rem;transition:.2s}
 .cta:hover::after{margin-left:.85rem}
 
+  /* ── Header actions (cart + hamburger) ─────────────── */
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
   .hamburger {
     display: none;
     flex-direction: column;
+    justify-content: center;
     gap: 5px;
     cursor: pointer;
-    padding: 4px;
+    padding: 8px;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    transition: background 0.2s;
   }
+  .hamburger:hover { background: rgba(255,255,255,0.08); }
 
   .hamburger span {
     display: block;
-    width: 24px;
+    width: 22px;
     height: 2px;
     background: var(--white);
     border-radius: 2px;
-    transition: all 0.3s;
+    transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease;
+    transform-origin: center;
   }
+
+  /* Animação X quando aberto */
+  .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+  .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* Overlay escuro atrás do menu */
+  .nav-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 998;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .nav-overlay.active { opacity: 1; }
 
 /* ── Cart Sidebar ─────────────────────────────────────────────────────────── */
 .cart-overlay {
@@ -2240,7 +2271,13 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
 
   @media (max-width: 768px) {
     section { padding: 3rem 1.25rem; }
+    .nav-overlay.active { display: block; }
+    .hamburger { display: flex; }
+
+    /* Esconde links do nav por padrão no mobile */
     nav { display: none; }
+
+    /* Menu aberto — painel deslizante */
     nav.open {
       display: flex;
       flex-direction: column;
@@ -2248,13 +2285,39 @@ body{font-family:var(--ff-ui);background:var(--body-bg);color:var(--ink);line-he
       top: 74px;
       left: 0;
       right: 0;
-      background: var(--dark);
-      padding: 1rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
+      background: #111010;
+      padding: 0.5rem 0 1.5rem;
+      border-top: 1px solid rgba(192,20,60,0.3);
       z-index: 999;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+      animation: slideDown 0.25s ease;
     }
-    nav.open a { padding: 0.7rem 1rem; width: 100%; }
-    .hamburger { display: flex; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    nav.open a {
+      padding: 0.85rem 1.5rem;
+      width: 100%;
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.85);
+    }
+    nav.open a:last-of-type { border-bottom: none; }
+    nav.open a:hover { background: rgba(255,255,255,0.05); color: #fff; }
+
+    /* Botão CTA dentro do menu mobile */
+    nav.open .nav-cta-desktop {
+      display: block;
+      margin: 1rem 1.5rem 0;
+      width: calc(100% - 3rem);
+      text-align: center;
+      padding: 0.85rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+    }
     .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
     .sobre-grid { grid-template-columns: 1fr; gap: 2rem; }
     .servicos-grid { grid-template-columns: 1fr; }
